@@ -1,4 +1,5 @@
 %option noyywrap
+%x comment
 %{
 /*****************声明和选项设置  begin*****************/
 #include <string.h>
@@ -38,7 +39,7 @@ enum cminus_token_type{
 	RETURN = 281,
 	VOID = 282,
 	WHILE = 283,
-	IDENTIFIER = 284,
+	IDENTIFIER = 284, 
 	NUMBER = 285,
 	LETTER = 286,
 	ARRAY = 287,
@@ -49,10 +50,51 @@ enum cminus_token_type{
 /*****************end*****************/
 
 %}
-
+/***正规定义***/
+digit [0-9]
+number {digit}+
+letter [A-Za-z]
+id {letter}+
+array {id}\[{digit}+\]
+delim [ \t]
+blank {delim}+
 %%
 
  /****请在此补全所有flex的模式与动作  start******/
+"+"	{return (ADD);}
+"-" {return (SUB);}
+"*" {return (MUL);}
+"/" {return (DIV);}
+"<" {return (LT);}
+"<=" {return (LTE);}
+">" {return (GT);}
+">=" {return (GTE);}
+"==" {return (EQ);}
+"!=" {return (NEQ);}
+"=" {return (ASSIN);}
+";" {return (SEMICOLON);}
+"," {return (COMMA);}
+"(" {return (LPARENTHESE);}
+")" {return (RPARENTHESE);}
+"[" {return (LBRACKET);}
+"]" {return (RBRACKET);}
+"{" {return (LBRACE);}
+"}" {return (RBRACE);}
+else {return ELSE;}
+if {return IF;}
+int {return INT;}
+return {return RETURN;}
+void {return VOID;}
+while {return WHILE;}
+{array} {return ARRAY;}
+{id} {return IDENTIFIER;}
+{number} {return NUMBER;}
+\n {return EOL;}
+{blank} {return BLANK;}
+"/*" {pos_start += 2; BEGIN comment;}
+<comment>"*/" {pos_start += 2; BEGIN 0;}
+<comment>. {return COMMENT;}
+<comment>\n {return EOL;}
 
 . {return ERROR;}
 
@@ -79,18 +121,29 @@ void analyzer(char* input_file_name, char* output_file_name){
 	printf("[START]: Read from: %s\n", input_file_name);
 	FILE *fp = fopen(output_path,"w+");
 	int token;
+	lines = 1;
+	pos_start = 1;
 	while(token = yylex()){
 		switch(token){
 			case ERROR:
+				pos_end = pos_start + yyleng;
 				fprintf(fp, "[ERR]: unable to analysize %s at %d line, from %d to %d\n", yytext, lines, pos_start, pos_end);
+				pos_start = pos_end;
 				break;
 			case COMMENT:
+				pos_start += 1;
+				break;
 			case BLANK:
+				pos_start += yyleng;
 				break;
 			case EOL:
+				lines += 1;
+				pos_start = 1;
 				break;
 			default :
+				pos_end = pos_start + yyleng;
 				fprintf(fp, "%s\t%d\t%d\t%d\t%d\n",yytext, token, lines, pos_start, pos_end);
+				pos_start = pos_end;
 		}
 	}
 	fclose(fp);
@@ -102,6 +155,17 @@ void analyzer(char* input_file_name, char* output_file_name){
 /// under 'testcase' directory, there could be many *.cminus files.
 /// \todo student should fill this function
 void getAllTestcase(char filename[][256]){
+	DIR *dp = opendir("./testcase");
+	int i = 0;
+	struct dirent *file;
+	while (file = readdir(dp)) {
+		if (strstr(file->d_name, ".cminus")) {
+			strcpy(filename[i], file->d_name);
+			i++;
+		}
+	}
+	files_count = i;
+	closedir(dp);
 }
 
 /// \brief process all *.cminus file
@@ -116,8 +180,14 @@ int main(int argc, char **argv){
 	char suffix[] = ".tokens";
 	getAllTestcase(filename);
 	for(int i = 0; i < files_count; i++){
-
-			analyzer(filename[i],output_file_name);
+		int j = 0;
+		while (filename[i][j] != '.') {
+			output_file_name[j] = filename[i][j];
+			j++;
+		}
+		output_file_name[j] = 0;
+		strcat(output_file_name, suffix);
+		analyzer(filename[i],output_file_name);
 	}
 	return 0;
 }
