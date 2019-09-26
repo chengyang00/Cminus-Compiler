@@ -1,0 +1,10 @@
+int main()
+{
+    int compile;
+
+    compile = 10;
+
+    compile = compile + 20;
+
+    return 0;
+}

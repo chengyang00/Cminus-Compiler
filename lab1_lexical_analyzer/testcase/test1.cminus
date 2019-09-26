@@ -1,0 +1,14 @@
+int main()
+{
+    /* This is a multiline comment.
+     * And this is a start.
+     * Then continue...
+     * ......
+     * Oh, we must end it up. */
+    int cminus = 10;
+    int cplus = 0;
+    while (cminus > 0) {
+        cminus = cminus - 1;
+        cplus = cplus + 2;
+    }
+}
