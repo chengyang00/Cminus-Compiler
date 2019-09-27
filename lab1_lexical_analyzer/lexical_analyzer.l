@@ -55,7 +55,7 @@ digit [0-9]
 number {digit}+
 letter [A-Za-z]
 id {letter}+
-array {id}\[{digit}+\]
+array {id}(\[{number}\])+
 delim [ \t]
 blank {delim}+
 %%
