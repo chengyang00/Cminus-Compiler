@@ -80,6 +80,7 @@ blank {delim}+
 "]" {return (RBRACKET);}
 "{" {return (LBRACE);}
 "}" {return (RBRACE);}
+"\t" {pos_start += 1;}
 else {return ELSE;}
 if {return IF;}
 int {return INT;}
