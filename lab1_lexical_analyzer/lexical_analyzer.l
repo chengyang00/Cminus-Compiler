@@ -2,16 +2,22 @@
 %x comment
 %{
 /*****************声明和选项设置  begin*****************/
-#include <string.h>
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <dirent.h>
-int files_count = 0;
+#include <stdlib.h>
+
+#include "lab1_lexical_analyzer/lexical_analyzer.h"
+#include "common/common.h"
+
+#ifndef LAB1_ONLY
+#include "syntax_analyzer.h"
+#endif
+
+int files_count;
 int lines;
 int pos_start;
 int pos_end;
 
+<<<<<<< HEAD
 enum cminus_token_type{
 	ERROR = 258,
 	ADD = 259,
@@ -58,8 +64,18 @@ id {letter}+
 array {id}(\[{number}\])+
 delim [ \t]
 blank {delim}+
+=======
+/*****************声明和选项设置  end*****************/
+
+%}
+
+commentPattern "/*"([^\*]|(\*)*[^\*/])*(\*)*"*/"
+identifierPattern [a-zA-Z][a-zA-Z]*
+
+>>>>>>> upstream/master
 %%
 
+ /******************TODO*********************/
  /****请在此补全所有flex的模式与动作  start******/
 "+"	{return (ADD);}
 "-" {return (SUB);}
@@ -100,17 +116,19 @@ while {return WHILE;}
 . {return ERROR;}
 
 
- /****  end******/
-%%
 
-/****************请按需求补全C代码 start*************/
+ /****请在此补全所有flex的模式与动作  end******/
+%%
+/****************C代码 start*************/
 
 /// \brief analysize a *.cminus file
 ///
 ///	\param input_file_name
 /// \param output_file_name
-/// \todo student should fill this function
 void analyzer(char* input_file_name, char* output_file_name){
+	lines = 1;
+	pos_start = 1;
+	pos_end = 1;
 	char input_path[256] = "./testcase/";
 	strcat(input_path, input_file_name);
 	char output_path[256] = "./tokens/";
@@ -121,10 +139,13 @@ void analyzer(char* input_file_name, char* output_file_name){
 	}
 	printf("[START]: Read from: %s\n", input_file_name);
 	FILE *fp = fopen(output_path,"w+");
+
 	int token;
 	lines = 1;
 	pos_start = 1;
 	while(token = yylex()){
+		pos_start = pos_end;
+		pos_end += strlen(yytext);
 		switch(token){
 			case ERROR:
 				pos_end = pos_start + yyleng;
@@ -139,7 +160,10 @@ void analyzer(char* input_file_name, char* output_file_name){
 				break;
 			case EOL:
 				lines += 1;
-				pos_start = 1;
+				pos_start = 1,pos_end = 1;
+				break;
+			case NUMBER:
+				fprintf(fp, "%d\t%d\t%d\t%d\t%d\n",atoi(yytext), token, lines, pos_start, pos_end);
 				break;
 			default :
 				pos_end = pos_start + yyleng;
@@ -172,9 +196,6 @@ void getAllTestcase(char filename[][256]){
 /// \brief process all *.cminus file
 ///
 /// note that: use relative path for all i/o operations
-///	process all *.cminus files under 'testcase' directory,
-/// then create *.tokens files under 'tokens' directory
-/// \todo student should fill this function
 int main(int argc, char **argv){
 	char filename[10][256];
 	char output_file_name[256];
@@ -192,4 +213,5 @@ int main(int argc, char **argv){
 	}
 	return 0;
 }
-/**************** end*************/
+
+/****************C代码 end*************/
