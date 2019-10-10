@@ -21,12 +21,48 @@ int pos_end;
 %}
 
 commentPattern "/*"([^\*]|(\*)*[^\*/])*(\*)*"*/"
+digitPattern [0-9]
+numberPattern {digitPattern}+
 identifierPattern [a-zA-Z][a-zA-Z]*
 
 %%
 
  /******************TODO*********************/
  /****请在此补全所有flex的模式与动作  start******/
+
+{commentPattern} {return COMMENT;}
+"+" {return ADD;}
+"-" {return SUB;}
+"*" {return MUL;}
+"/" {return DIV;}
+
+"<" {return LT;}
+"<=" {return LTE;}
+">" {return GT;}
+">=" {return GTE;}
+"==" {return EQ;}
+"!=" {return NEQ;}
+"=" {return ASSIN;}
+";" {return SEMICOLON;}
+"," {return COMMA;}
+"(" {return LPARENTHESE;}
+")" {return RPARENTHESE;}
+"[" {return LBRACKET;}
+"]" {return RBRACKET;}
+"{" {return LBRACE;}
+"}" {return RBRACE;}
+"[]" {return ARRAY;}
+"else" {return ELSE;}
+"if" {return IF;}
+"int" {return INT;}
+"return" {return RETURN;}
+"void" {return VOID;}
+"while" {return WHILE;}
+{identifierPattern} {return IDENTIFIER;}
+{numberPattern} {return NUMBER; }
+
+\n { return EOL;}
+[ \t] {return BLANK;}
 
 . {return ERROR;}
 
@@ -56,17 +92,32 @@ void analyzer(char* input_file_name, char* output_file_name){
 	FILE *fp = fopen(output_path,"w+");
 
 	int token;
-	while(token = yylex()){
+	while ((token = yylex())) {
 		pos_start = pos_end;
 		pos_end += strlen(yytext);
-		switch(token){
+		switch (token) {
 			case ERROR:
 				fprintf(fp, "[ERR]: unable to analysize %s at %d line, from %d to %d\n", yytext, lines, pos_start, pos_end);
 				break;
-			case COMMENT:
+			case COMMENT: {
+				pos_end -= strlen(yytext);
+				int i = 0;
+				for ( i = 0; i < strlen(yytext); i++)
+				{
+					if (yytext[i] == '\n') {
+						pos_start = pos_end = 1;
+						lines++;
+        	        }
+					else {
+                		pos_end++;
+					}
+				}
+				break;
+			}
 			case BLANK:
 				break;
 			case EOL:
+				lines++;
 				pos_start = 1,pos_end = 1;
 				break;
 			case NUMBER:
@@ -97,4 +148,3 @@ int lex_main(int argc, char **argv){
 	return 0;
 }
 /****************C代码 end*************/
-
