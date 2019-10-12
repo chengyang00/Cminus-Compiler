@@ -3,6 +3,7 @@
 /*****************声明和选项设置  begin*****************/
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "lab1_lexical_analyzer/lexical_analyzer.h"
 #include "common/common.h"
@@ -30,7 +31,17 @@ identifierPattern [a-zA-Z][a-zA-Z]*
  /******************TODO*********************/
  /****请在此补全所有flex的模式与动作  start******/
 
-{commentPattern} {return COMMENT;}
+{commentPattern} {
+	for (int j = 0; j < strlen(yytext); j++)
+	{
+		if (yytext[j] == '\n') {
+			lines++;
+		}
+	}
+	#ifdef LAB1_ONLY
+	return COMMENT;
+	#endif
+}
 "+" {return ADD;}
 "-" {return SUB;}
 "*" {return MUL;}
@@ -58,11 +69,30 @@ identifierPattern [a-zA-Z][a-zA-Z]*
 "return" {return RETURN;}
 "void" {return VOID;}
 "while" {return WHILE;}
-{identifierPattern} {return IDENTIFIER;}
-{numberPattern} {return NUMBER; }
+{identifierPattern} {
+	#ifndef LAB1_ONLY
+	yylval.str = strdup(yytext);
+	#endif
+	return IDENTIFIER;
+}
+{numberPattern} {
+	#ifndef LAB1_ONLY
+	yylval.value = atoi(yytext);
+	#endif
+	return NUMBER; 
+}
 
-\n { return EOL;}
-[ \t] {return BLANK;}
+\n { 
+	lines++;
+	#ifdef LAB1_ONLY
+	return EOL;
+	#endif
+}
+[ \t] {
+	#ifdef LAB1_ONLY
+	return BLANK;
+	#endif
+}
 
 . {return ERROR;}
 
@@ -101,12 +131,10 @@ void analyzer(char* input_file_name, char* output_file_name){
 				break;
 			case COMMENT: {
 				pos_end -= strlen(yytext);
-				int i = 0;
-				for ( i = 0; i < strlen(yytext); i++)
+				for (int i = 0; i < strlen(yytext); i++)
 				{
 					if (yytext[i] == '\n') {
 						pos_start = pos_end = 1;
-						lines++;
         	        }
 					else {
                 		pos_end++;
@@ -117,7 +145,6 @@ void analyzer(char* input_file_name, char* output_file_name){
 			case BLANK:
 				break;
 			case EOL:
-				lines++;
 				pos_start = 1,pos_end = 1;
 				break;
 			case NUMBER:

@@ -15,12 +15,14 @@ int getAllTestcase(char filename[][256])
 		fprintf(stderr, "open directory error\n");
 		return 0;
 	}
-	while (file = readdir(dp))
+	file = readdir(dp);
+	while (file)
 	{
 		if (strstr(file->d_name, suffix)) {
 			strcpy(filename[i], file->d_name);
 			i++;
 		}
+		file = readdir(dp);
 	}
 	closedir(dp);
 	return i;
