@@ -11,7 +11,7 @@
 #include <iostream>
 #include <memory>
 
-#ifdef DEBUG  // 用于调试信息,大家可以在编译过程中通过" -DDEBUG"来开启这一选项
+#ifdef DEBUG  // 用于调试信息，大家可以在编译过程中通过" -DDEBUG"来开启这一选项
 #define DEBUG_OUTPUT std::cout << __LINE__ << std::endl;  // 输出行号的简单示例
 #else
 #define DEBUG_OUTPUT
@@ -77,7 +77,7 @@ int main() {
   builder.SetInsertPoint(retBB);  // ret分支
   auto retLoad = builder.CreateLoad(retAlloca);
   builder.CreateRet(retLoad);
-
+ 
   // main函数
   auto mainFun = Function::Create(FunctionType::get(TYPE32, false),
                                   GlobalValue::LinkageTypes::ExternalLinkage,

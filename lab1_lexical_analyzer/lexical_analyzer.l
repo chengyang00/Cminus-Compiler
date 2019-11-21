@@ -3,6 +3,7 @@
 /*****************声明和选项设置  begin*****************/
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "lab1_lexical_analyzer/lexical_analyzer.h"
 #include "common/common.h"
@@ -21,12 +22,77 @@ int pos_end;
 %}
 
 commentPattern "/*"([^\*]|(\*)*[^\*/])*(\*)*"*/"
+digitPattern [0-9]
+numberPattern {digitPattern}+
 identifierPattern [a-zA-Z][a-zA-Z]*
 
 %%
 
  /******************TODO*********************/
  /****请在此补全所有flex的模式与动作  start******/
+
+{commentPattern} {
+	for (int j = 0; j < strlen(yytext); j++)
+	{
+		if (yytext[j] == '\n') {
+			lines++;
+		}
+	}
+	#ifdef LAB1_ONLY
+	return COMMENT;
+	#endif
+}
+"+" {return ADD;}
+"-" {return SUB;}
+"*" {return MUL;}
+"/" {return DIV;}
+
+"<" {return LT;}
+"<=" {return LTE;}
+">" {return GT;}
+">=" {return GTE;}
+"==" {return EQ;}
+"!=" {return NEQ;}
+"=" {return ASSIN;}
+";" {return SEMICOLON;}
+"," {return COMMA;}
+"(" {return LPARENTHESE;}
+")" {return RPARENTHESE;}
+"[" {return LBRACKET;}
+"]" {return RBRACKET;}
+"{" {return LBRACE;}
+"}" {return RBRACE;}
+"[]" {return ARRAY;}
+"else" {return ELSE;}
+"if" {return IF;}
+"int" {return INT;}
+"return" {return RETURN;}
+"void" {return VOID;}
+"while" {return WHILE;}
+{identifierPattern} {
+	#ifndef LAB1_ONLY
+	yylval.str = strdup(yytext);
+	#endif
+	return IDENTIFIER;
+}
+{numberPattern} {
+	#ifndef LAB1_ONLY
+	yylval.value = atoi(yytext);
+	#endif
+	return NUMBER; 
+}
+
+\n { 
+	lines++;
+	#ifdef LAB1_ONLY
+	return EOL;
+	#endif
+}
+[ \t] {
+	#ifdef LAB1_ONLY
+	return BLANK;
+	#endif
+}
 
 . {return ERROR;}
 
@@ -56,14 +122,26 @@ void analyzer(char* input_file_name, char* output_file_name){
 	FILE *fp = fopen(output_path,"w+");
 
 	int token;
-	while(token = yylex()){
+	while ((token = yylex())) {
 		pos_start = pos_end;
 		pos_end += strlen(yytext);
-		switch(token){
+		switch (token) {
 			case ERROR:
 				fprintf(fp, "[ERR]: unable to analysize %s at %d line, from %d to %d\n", yytext, lines, pos_start, pos_end);
 				break;
-			case COMMENT:
+			case COMMENT: {
+				pos_end -= strlen(yytext);
+				for (int i = 0; i < strlen(yytext); i++)
+				{
+					if (yytext[i] == '\n') {
+						pos_start = pos_end = 1;
+        	        }
+					else {
+                		pos_end++;
+					}
+				}
+				break;
+			}
 			case BLANK:
 				break;
 			case EOL:
