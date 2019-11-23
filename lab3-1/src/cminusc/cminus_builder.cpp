@@ -14,73 +14,90 @@ int stmt_num = 0;
 // You can define global variables here
 // to store state
 
-void CminusBuilder::visit(syntax_program &node) {
-    for(auto decl: node.declarations){
+void CminusBuilder::visit(syntax_program &node)
+{
+    for (auto decl : node.declarations)
+    {
         decl->accept(*this);
     }
 }
 
-void CminusBuilder::visit(syntax_num &node) {
+void CminusBuilder::visit(syntax_num &node)
+{
     exp_val = node.value;
 }
 
-void CminusBuilder::visit(syntax_var_declaration &node) {
+void CminusBuilder::visit(syntax_var_declaration &node)
+{
     int temp = 0;
-    auto local = builder.CreateAlloca(ArrayType::get(Type::getInt32PtrTy(context, 0),0));
-    if(node.num){
+    auto local = builder.CreateAlloca(ArrayType::get(Type::getInt32PtrTy(context, 0), 0));
+    if (node.num)
+    {
         temp = node.num->value;
-        local = builder.CreateAlloca(ArrayType::get(Type::getInt32PtrTy(context, temp),temp));
+        local = builder.CreateAlloca(ArrayType::get(Type::getInt32PtrTy(context, temp), temp));
     }
-    if(scope.in_global()){
-        auto global = new GlobalVariable(*(module.get()),Type::getInt32PtrTy(context, temp),false,
-                                        GlobalValue::LinkageTypes::CommonLinkage,ConstantAggregateZero::get(Type::getInt32PtrTy(context, temp)),
-                                        node.id);
+    if (scope.in_global())
+    {
+        auto global = new GlobalVariable(*(module.get()), Type::getInt32PtrTy(context, temp), false,
+                                         GlobalValue::LinkageTypes::CommonLinkage, ConstantAggregateZero::get(Type::getInt32PtrTy(context, temp)),
+                                         node.id);
         scope.push(node.id, global);
     }
-    else{
-        scope.push(node.id, local); 
+    else
+    {
+        scope.push(node.id, local);
     }
 }
 
-void CminusBuilder::visit(syntax_fun_declaration &node) {
+void CminusBuilder::visit(syntax_fun_declaration &node)
+{
     auto TyVoid = llvm::Type::getVoidTy(context);
     auto TyInt32 = llvm::Type::getInt32Ty(context);
     std::vector<Type *> Ints(node.params.size(), TyInt32);
     auto fun_type = llvm::FunctionType::get(TyVoid, false);
-    if(node.params.size() > 0){
-        if(node.type == TYPE_VOID){
+    if (node.params.size() > 0)
+    {
+        if (node.type == TYPE_VOID)
+        {
             fun_type = FunctionType::get(TyVoid, Ints, false);
         }
-        else{
+        else
+        {
             fun_type = FunctionType::get(TyInt32, Ints, false);
         }
     }
-    else{
-        if(node.type == TYPE_INT){
+    else
+    {
+        if (node.type == TYPE_INT)
+        {
             fun_type = llvm::FunctionType::get(TyInt32, false);
         }
-        else{
+        else
+        {
             fun_type = FunctionType::get(TyVoid, false);
         }
     }
-    
+
     auto Fun = llvm::Function::Create(fun_type,
-                                    GlobalValue::LinkageTypes::ExternalLinkage,
-                                    node.id, module.get());
+                                      GlobalValue::LinkageTypes::ExternalLinkage,
+                                      node.id, module.get());
     scope.push(node.id, Fun);
     scope.enter();
-    for(auto i: node.params){
+    for (auto i : node.params)
+    {
         i->accept(*this);
     }
     node.compound_stmt->accept(*this);
     scope.exit();
 }
 
-void CminusBuilder::visit(syntax_param &node) {
+void CminusBuilder::visit(syntax_param &node)
+{
     Type *TYPE32 = llvm::Type::getInt32Ty(context);
     retv = builder.CreateAlloca(TYPE32);
-    auto uAlloca = builder.CreateAlloca(TYPE32); 
-    if(node.isarray){
+    auto uAlloca = builder.CreateAlloca(TYPE32);
+    if (node.isarray)
+    {
         uAlloca = builder.CreateAlloca(Type::getInt32PtrTy(context));
     }
     scope.push(node.id, uAlloca);
@@ -224,9 +241,15 @@ void CminusBuilder::visit(syntax_var &node)
     else
     {
         std::string name = node.id;
-        llvm::Value *addr = scope.find(name);
-        var_addr = llvm::ConstantInt::get(context, *addr);
+        llvm::Value *Val = scope.find(name);
         //TYTE 转成 C++的int类型
+        if (ConstantInt *CI = dyn_cast<ConstantInt>(Val))
+        {
+            if (CI->getBitWidth() <= 32)
+            {
+                var_addr = CI->getSExtValue();
+            }
+        }
     }
 }
 
