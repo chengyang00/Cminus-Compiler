@@ -6,7 +6,7 @@ using namespace std;
     ConstantInt::get(context, APInt(32, num)) //得到常数值的表示,方便后面多次用到
 
 AllocaInst *retv;           //store return value
-type_specifier type_fundec; //store fun type
+Function *func;
 int exp_val;
 int var_addr;
 int stmt_num = 0;
@@ -81,6 +81,7 @@ void CminusBuilder::visit(syntax_fun_declaration &node)
     auto Fun = llvm::Function::Create(fun_type,
                                       GlobalValue::LinkageTypes::ExternalLinkage,
                                       node.id, module.get());
+    func = Fun;
     scope.push(node.id, Fun);
     scope.enter();
     for (auto i : node.params)
@@ -134,9 +135,9 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
     {
         if (node.else_statement != nullptr)
         {
-            auto trueBB = llvm::BasicBlock::Create(context, "trueBB", );
-            auto falseBB = llvm::BasicBlock::Create(context, "falseBB", );
-            auto endBB = llvm::BasicBlock::Create(context, "endBB", );
+            auto trueBB = llvm::BasicBlock::Create(context, "trueBB", func);
+            auto falseBB = llvm::BasicBlock::Create(context, "falseBB", func);
+            auto endBB = llvm::BasicBlock::Create(context, "endBB", func);
 
             node.expression->accept(*this);
             auto icmp = builder.CreateICmpEQ(CONST(exp_val), CONST(0));
@@ -155,8 +156,8 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
         }
         else
         {
-            auto trueBB = llvm::BasicBlock::Create(context, "trueBB", );
-            auto endBB = llvm::BasicBlock::Create(context, "endBB", );
+            auto trueBB = llvm::BasicBlock::Create(context, "trueBB", func);
+            auto endBB = llvm::BasicBlock::Create(context, "endBB", func);
 
             node.expression->accept(*this);
             auto icmp = builder.CreateICmpEQ(CONST(exp_val), CONST(0));
@@ -172,8 +173,8 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
     {
         if (node.else_statement != nullptr)
         {
-            auto trueBB = llvm::BasicBlock::Create(context, "trueBB", );
-            auto falseBB = llvm::BasicBlock::Create(context, "falseBB", );
+            auto trueBB = llvm::BasicBlock::Create(context, "trueBB", func);
+            auto falseBB = llvm::BasicBlock::Create(context, "falseBB", func);
 
             node.expression->accept(*this);
             auto icmp = builder.CreateICmpEQ(CONST(exp_val), CONST(0));
@@ -190,9 +191,9 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
 
 void CminusBuilder::visit(syntax_iteration_stmt &node)
 {
-    auto trueBB = llvm::BasicBlock::Create(context, "trueBB", ); //unfinished
-    auto falseBB = llvm::BasicBlock::Create(context, "falseBB", );
-    auto jugBB = llvm::BasicBlock::Create(context, "jugBB", );
+    auto trueBB = llvm::BasicBlock::Create(context, "trueBB", func); //unfinished
+    auto falseBB = llvm::BasicBlock::Create(context, "falseBB", func);
+    auto jugBB = llvm::BasicBlock::Create(context, "jugBB", func);
 
     builder.SetInsertPoint(jugBB);
     node.expression->accept(*this);
