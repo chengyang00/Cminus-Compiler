@@ -5,11 +5,11 @@ using namespace std;
 #define CONST(num) \
     ConstantInt::get(context, APInt(32, num)) //得到常数值的表示,方便后面多次用到
 
-AllocaInst *retv;           //store return value
+AllocaInst *retv; //store return value
 Function *func;
 int exp_val;
 int var_addr;
-int stmt_num = 0;
+int stmt_num;
 
 // You can define global variables here
 // to store state
@@ -18,39 +18,63 @@ void CminusBuilder::visit(syntax_program &node)
 {
     for (auto decl : node.declarations)
     {
+        printf("program begin:\n");
         decl->accept(*this);
+        printf("program end:\n");
     }
 }
 
 void CminusBuilder::visit(syntax_num &node)
 {
+    printf("num begin:\n");
     exp_val = node.value;
+    printf("num end:\n");
 }
 
 void CminusBuilder::visit(syntax_var_declaration &node)
 {
+    printf("var_declaration begin:\n");
     int temp = 0;
-    auto local = builder.CreateAlloca(ArrayType::get(Type::getInt32PtrTy(context, 0), 0));
-    if (node.num)
-    {
-        temp = node.num->value;
-        local = builder.CreateAlloca(ArrayType::get(Type::getInt32PtrTy(context, temp), temp));
-    }
+    Type *TYPE32 = Type::getInt32Ty(context);
+
     if (scope.in_global())
     {
-        auto global = new GlobalVariable(*(module.get()), Type::getInt32PtrTy(context, temp), false,
-                                         GlobalValue::LinkageTypes::CommonLinkage, ConstantAggregateZero::get(Type::getInt32PtrTy(context, temp)),
-                                         node.id);
-        scope.push(node.id, global);
+        if (node.num != nullptr)
+        {
+            temp = node.num->value;
+            auto global = new GlobalVariable(*(module.get()), ArrayType::get(TYPE32,temp), false,
+                                             GlobalValue::LinkageTypes::CommonLinkage, ConstantAggregateZero::get(ArrayType::get(TYPE32,temp)),
+                                             node.id);
+            scope.push(node.id, global);
+        }
+        else
+        {
+            auto global = new GlobalVariable(*(module.get()), TYPE32, false,
+                                             GlobalValue::LinkageTypes::CommonLinkage, ConstantAggregateZero::get(TYPE32),
+                                             node.id);
+            scope.push(node.id, global);
+        }
     }
     else
     {
-        scope.push(node.id, local);
+        if (node.num != nullptr)
+        {
+            temp = node.num->value;
+            auto local = builder.CreateAlloca(ArrayType::get(TYPE32, temp));
+            scope.push(node.id, local);
+        }
+        else
+        {
+            auto local = builder.CreateAlloca(TYPE32);
+            scope.push(node.id, local);
+        } 
     }
+    printf("var_declaration end:\n");
 }
 
 void CminusBuilder::visit(syntax_fun_declaration &node)
 {
+    printf("fun_declaration begin:\n");
     auto TyVoid = llvm::Type::getVoidTy(context);
     auto TyInt32 = llvm::Type::getInt32Ty(context);
     std::vector<Type *> Ints(node.params.size(), TyInt32);
@@ -90,10 +114,12 @@ void CminusBuilder::visit(syntax_fun_declaration &node)
     }
     node.compound_stmt->accept(*this);
     scope.exit();
+    printf("fun_declaration end:\n");
 }
 
 void CminusBuilder::visit(syntax_param &node)
 {
+    printf("param begin:\n");
     Type *TYPE32 = llvm::Type::getInt32Ty(context);
     retv = builder.CreateAlloca(TYPE32);
     auto uAlloca = builder.CreateAlloca(TYPE32);
@@ -102,10 +128,12 @@ void CminusBuilder::visit(syntax_param &node)
         uAlloca = builder.CreateAlloca(Type::getInt32PtrTy(context));
     }
     scope.push(node.id, uAlloca);
+    printf("param end:\n");
 }
 
 void CminusBuilder::visit(syntax_compound_stmt &node)
 {
+    printf("compound_stmt begin:\n");
     scope.enter();
     for (auto delc : node.local_declarations)
     {
@@ -121,16 +149,20 @@ void CminusBuilder::visit(syntax_compound_stmt &node)
         stmt_num--;
     }
     scope.exit();
+    printf("compound_stmt end:\n");
 }
 
 void CminusBuilder::visit(syntax_expresion_stmt &node)
 {
+    printf("expresion_stmt begin:\n");
     if (node.expression != nullptr)
         node.expression->accept(*this);
+    printf("expresion_stmt end:\n");
 }
 
 void CminusBuilder::visit(syntax_selection_stmt &node)
 {
+    printf("selection_stmt begin:\n");
     if (stmt_num > 0)
     {
         if (node.else_statement != nullptr)
@@ -187,11 +219,13 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
             node.else_statement->accept(*this);
         }
     }
+    printf("selection_stmt end:\n");
 }
 
 void CminusBuilder::visit(syntax_iteration_stmt &node)
 {
-    auto trueBB = llvm::BasicBlock::Create(context, "trueBB", func); //unfinished
+    printf("iteration_stmt beign:\n");
+    auto trueBB = llvm::BasicBlock::Create(context, "trueBB", func); 
     auto falseBB = llvm::BasicBlock::Create(context, "falseBB", func);
     auto jugBB = llvm::BasicBlock::Create(context, "jugBB", func);
 
@@ -205,11 +239,12 @@ void CminusBuilder::visit(syntax_iteration_stmt &node)
     builder.CreateBr(jugBB);
 
     builder.SetInsertPoint(falseBB);
-    //unfinished
+    printf("iteration_stmt end:\n");
 }
 
 void CminusBuilder::visit(syntax_return_stmt &node)
 {
+    printf("return_stmt begin:\n");
     if (node.expression == nullptr)
     {
         return;
@@ -219,10 +254,12 @@ void CminusBuilder::visit(syntax_return_stmt &node)
         node.expression->accept(*this);    //得到expression的值
         builder.CreateRet(CONST(exp_val)); //全局变量 表达式的值
     }
+    printf("return_stmt end:\n");
 }
 
 void CminusBuilder::visit(syntax_var &node)
 {
+    printf("var begin:\n");
     if (node.expression != nullptr)
     {
         node.expression->accept(*this);
@@ -252,10 +289,12 @@ void CminusBuilder::visit(syntax_var &node)
             }
         }
     }
+    printf("var end:\n");
 }
 
 void CminusBuilder::visit(syntax_assign_expression &node)
 {
+    printf("assign_expression begin:\n");
     node.var->accept(*this);
     //调用 var 得到地址后，直接使用。
     node.expression->accept(*this);
@@ -263,10 +302,12 @@ void CminusBuilder::visit(syntax_assign_expression &node)
     //llvm::APInt addr = llvm::APInt(32, var_addr);
     //llvm::APInt val = llvm::APInt(32, exp_val);
     builder.CreateStore(CONST(var_addr), CONST(exp_val));
+    printf("assign_expression end:\n");
 }
 
 void CminusBuilder::visit(syntax_simple_expression &node)
 {
+    printf("simple_expression begin:\n");
     if (node.additive_expression_r == nullptr)
     {
         node.additive_expression_l->accept(*this);
@@ -326,10 +367,12 @@ void CminusBuilder::visit(syntax_simple_expression &node)
                 exp_val = 0;
         }
     }
+    printf("simple_expression end:\n");
 }
 
 void CminusBuilder::visit(syntax_additive_expression &node)
 {
+    printf("additive_expression begin:\n");
     if (node.additive_expression == nullptr)
     {
         node.term->accept(*this);
@@ -351,10 +394,12 @@ void CminusBuilder::visit(syntax_additive_expression &node)
             builder.CreateNSWSub(CONST(addiexpr), CONST(term));
         }
     }
+    printf("additive_expression end:\n");
 }
 
 void CminusBuilder::visit(syntax_term &node)
 {
+    printf("term begin:\n");
     if (node.term == nullptr)
     {
         node.factor->accept(*this);
@@ -376,10 +421,12 @@ void CminusBuilder::visit(syntax_term &node)
             builder.CreateSDiv(CONST(term), CONST(factor));
         }
     }
+    printf("term end:\n");
 }
 
 void CminusBuilder::visit(syntax_call &node)
 {
+    printf("call begin:\n");
     auto CalleeF = scope.find(node.id);
     vector<Value *> Argu;
     for (auto s = node.args.begin(); s != node.args.end(); s++)
@@ -388,4 +435,5 @@ void CminusBuilder::visit(syntax_call &node)
         Argu.push_back(CONST(exp_val));
     }
     builder.CreateCall(CalleeF, Argu);
+    printf("call end:\n");
 }
