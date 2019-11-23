@@ -24,28 +24,47 @@ void CminusBuilder::visit(syntax_program &node)
 
 void CminusBuilder::visit(syntax_num &node)
 {
+    printf("num\n");
     exp_val = node.value;
 }
 
 void CminusBuilder::visit(syntax_var_declaration &node)
 {
+   printf("var_declaration\n");
     int temp = 0;
-    auto local = builder.CreateAlloca(ArrayType::get(Type::getInt32PtrTy(context, 0), 0));
-    if (node.num)
-    {
-        temp = node.num->value;
-        local = builder.CreateAlloca(ArrayType::get(Type::getInt32PtrTy(context, temp), temp));
-    }
+    Type *TYPE32 = Type::getInt32Ty(context);
+
     if (scope.in_global())
     {
-        auto global = new GlobalVariable(*(module.get()), Type::getInt32PtrTy(context, temp), false,
-                                         GlobalValue::LinkageTypes::CommonLinkage, ConstantAggregateZero::get(Type::getInt32PtrTy(context, temp)),
-                                         node.id);
-        scope.push(node.id, global);
+        if (node.num != nullptr)
+        {
+            temp = node.num->value;
+            auto global = new GlobalVariable(*(module.get()), ArrayType::get(TYPE32,temp), false,
+                                             GlobalValue::LinkageTypes::CommonLinkage, ConstantAggregateZero::get(ArrayType::get(TYPE32,temp)),
+                                             node.id);
+            scope.push(node.id, global);
+        }
+        else
+        {
+            auto global = new GlobalVariable(*(module.get()), TYPE32, false,
+                                             GlobalValue::LinkageTypes::CommonLinkage, ConstantAggregateZero::get(TYPE32),
+                                             node.id);
+            scope.push(node.id, global);
+        }
     }
     else
     {
-        scope.push(node.id, local);
+        if (node.num != nullptr)
+        {
+            temp = node.num->value;
+            auto local = builder.CreateAlloca(ArrayType::get(TYPE32, temp));
+            scope.push(node.id, local);
+        }
+        else
+        {
+            auto local = builder.CreateAlloca(TYPE32);
+            scope.push(node.id, local);
+        } 
     }
 }
 
