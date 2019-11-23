@@ -4,7 +4,9 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/mnt/e/Learn/Compiler_Principles/llvm/llvm-install/include/**"
+                "/mnt/e/Learn/Compiler_Principles/llvm/llvm-install/include/**",
+                "${workspaceFolder}/lab3-1/include",
+                "${workspaceFolder}/lab3-1/deps"
             ],
             "defines": [],
             "compilerPath": "/mnt/e/Learn/Compiler_Principles/llvm/llvm-install/bin/clang",

@@ -80,7 +80,7 @@ public:
     tree.root = nullptr;
   };
   syntax_program* get_root() { return root.get(); }
-  void run_visitor(syntax_tree_visitor& visitor);
+  void run_visitor(syntax_tree_visitor &visitor);
 private:
   syntax_tree_node* transform_node_iter(SyntaxTreeNode *);
   std::shared_ptr<syntax_program> root = nullptr;

@@ -37,7 +37,7 @@ public:
   }
 
   llvm::Value* find(std::string name) {
-    for (auto s = inner.rbegin(); s!= inner.rend();s++) {
+    for (auto s = inner.rbegin(); s!= inner.rend(); s++) {
       auto iter = s->find(name);
       if (iter != s->end()) {
         return iter->second;
