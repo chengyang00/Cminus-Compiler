@@ -315,11 +315,11 @@ void CminusBuilder::visit(syntax_var &node)
 void CminusBuilder::visit(syntax_assign_expression &node)
 {
     printf("assign_expression begin:\n");
-    llvm::Value *Var_addr;
+    llvm::Value *Var_addr = scope.find(node.var->id);
     if (node.var->expression != nullptr)
     {
         node.var->expression->accept(*this);
-        int Index;
+        /*int Index;
         if (ConstantInt *CI = dyn_cast<ConstantInt>(Exp_val))
         {
             if (CI->getBitWidth() <= 32)
@@ -337,13 +337,11 @@ void CminusBuilder::visit(syntax_assign_expression &node)
         {
             Value *addr = scope.find(node.var->id);
             Var_addr = builder.CreateGEP(addr, Exp_val, "array");
-        }
+        }*/
+        //无下标越界检查
+        Var_addr = builder.CreateGEP(Var_addr, Exp_val, node.var->id);
     }
-    else
-    {
-        std::string name = node.var->id;
-        Var_addr = scope.find(name);
-    }
+    
     
     //node.var->accept(*this);
     //调用 var 得到地址后，直接使用。

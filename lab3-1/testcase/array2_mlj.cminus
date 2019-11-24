@@ -1,0 +1,16 @@
+int gcd(int array[])
+{
+	if(array[1] > array[0])
+		return 1;
+	else
+		return 0;
+}
+void main(void)
+{
+	int array[2];
+	array[1] = 2;
+	array[0] = 1;
+	int a = gcd(array);
+	return;
+}
+	
