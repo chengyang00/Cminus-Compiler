@@ -1,15 +1,19 @@
-int gcd (int u, int v) { 
+int gcd (int u, int v) {
   if (v == 0) return u;
-  else return gcd(v, u - u / v * v); 
+  else return gcd(v, u - u / v * v);
 }
+
 int main(void) {
-  int x; int y; int temp;
-  x = 72;
-  y = 18;
-  if (x<y) {
+  int x;
+  int y;
+  int temp;
+  x = 18;
+  y = 72;
+  if (x < y) {
     temp = x;
     x = y;
     y = temp;
   }
-  return gcd(x,y);
+  temp = gcd(x, y);
+  return temp;
 }
