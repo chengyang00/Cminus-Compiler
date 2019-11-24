@@ -257,20 +257,20 @@ void CminusBuilder::visit(syntax_iteration_stmt &node)
 {
     printf("iteration_stmt beign:\n");
     auto jugBB = llvm::BasicBlock::Create(context, "jugBB", func);
-    auto trueBB = llvm::BasicBlock::Create(context, "trueBB", func);
-    auto falseBB = llvm::BasicBlock::Create(context, "falseBB", func);
+    auto l_trueBB = llvm::BasicBlock::Create(context, "trueBB", func);
+    auto l_falseBB = llvm::BasicBlock::Create(context, "falseBB", func);
 
     builder.CreateBr(jugBB);
     builder.SetInsertPoint(jugBB);
     node.expression->accept(*this);
-    auto br = builder.CreateCondBr(Exp_val, trueBB, falseBB);
+    auto br = builder.CreateCondBr(Exp_val, l_trueBB, l_falseBB);
 
-    builder.SetInsertPoint(trueBB);
+    builder.SetInsertPoint(l_trueBB);
     node.statement->accept(*this);
     builder.CreateBr(jugBB);
 
     printf("stmt_num: %d\n", stmt_num);
-    builder.SetInsertPoint(falseBB);
+    builder.SetInsertPoint(l_falseBB);
     std::cout<<"iteration_stmt end"<<endl;
     //printf("iteration_stmt end:\n");
 }
@@ -297,53 +297,38 @@ void CminusBuilder::visit(syntax_var &node)
 {
     std::cout<<"var begin"<<endl;
     llvm::Value *Var_addr = scope.find(node.id);
+    //auto check_end = BasicBlock::Create(context, "check_end", func);
     if (node.expression != nullptr)
     {
         node.expression->accept(*this);
-        Var_addr = builder.CreateGEP(Var_addr, {CONST(0),Exp_val}, node.id);
+        //Var_addr = builder.CreateGEP(Var_addr, {CONST(0),Exp_val}, node.id);
         auto icmp = builder.CreateICmpSGE(Exp_val, CONST(0));
-
-        auto normal = BasicBlock::Create(context, "normal", func);
+        //auto check_end = BasicBlock::Create(context, "check_end", func);
         auto except = BasicBlock::Create(context, "except", func);
-        auto check_end = BasicBlock::Create(context, "check_end", func);
+        auto normal = BasicBlock::Create(context, "normal", func);
+        
         auto br = builder.CreateCondBr(icmp, normal, except);
-
-        builder.SetInsertPoint(normal);
-        Var_addr = builder.CreateGEP(Var_addr, {CONST(0),Exp_val}, node.id);
-        builder.CreateBr(check_end);
-
         builder.SetInsertPoint(except);
         auto neg = scope.find("neg_idx_except");
         builder.CreateCall(neg);
+        builder.CreateRet(CONST(0));
+
+        builder.SetInsertPoint(normal);
+        Var_addr = builder.CreateGEP(Var_addr, {CONST(0),Exp_val}, node.id);
+        
+        //builder.CreateBr(check_end);
+
+        
+
         //builder.CreateRet(call);
 
-        builder.CreateBr(check_end);
-
-        builder.SetInsertPoint(check_end);
-        /*int Index;
-        if (ConstantInt *CI = dyn_cast<ConstantInt>(Exp_val))
-        {
-            if (CI->getBitWidth() <= 32)
-            {
-                Index = CI->getSExtValue();
-            }
-        }
-
-        if (Index < 0)
-        {
-            auto *except = module->getFunction("neg_idx_except");
-            builder.CreateCall(except);
-        }
-        else
-        {
-            Value *addr = scope.find(node.id);
-            Var_addr = builder.CreateGEP(addr, Exp_val, "array");
-        }*/
+        //builder.CreateBr(check_end);
+        //builder.SetInsertPoint(check_end);
+        //builder.SetInsertPoint(check_end);
     }
-    /*int *addr;
-    ConstantInt *C = dyn_cast<ConstantInt>(Var_addr);
-    addr = C->getSExtValue();*/
     Exp_val = builder.CreateLoad(Var_addr);
+    
+    
     std::cout<<"var end"<<endl;
 }
 
@@ -355,26 +340,19 @@ void CminusBuilder::visit(syntax_assign_expression &node)
     if (node.var->expression != nullptr)
     {
         node.var->expression->accept(*this);
-        /*int Index;
-        if (ConstantInt *CI = dyn_cast<ConstantInt>(Exp_val))
-        {
-            if (CI->getBitWidth() <= 32)
-            {
-                Index = CI->getSExtValue();
-            }
-        }
+        auto icmp = builder.CreateICmpSGE(Exp_val, CONST(0));
+        //auto check_end = BasicBlock::Create(context, "check_end", func);
+        auto except = BasicBlock::Create(context, "except", func);
+        auto normal = BasicBlock::Create(context, "normal", func);
+        
+        auto br = builder.CreateCondBr(icmp, normal, except);
+        builder.SetInsertPoint(except);
+        auto neg = scope.find("neg_idx_except");
+        builder.CreateCall(neg);
+        builder.CreateRet(CONST(0));
 
-        if (Index < 0)
-        {
-            auto *except = module->getFunction("neg_idx_except");
-            builder.CreateCall(except);
-        }
-        else
-        {
-            Value *addr = scope.find(node.var->id);
-            Var_addr = builder.CreateGEP(addr, Exp_val, "array");
-        }*/
-        //无下标越界检查
+        builder.SetInsertPoint(normal);
+        
         Var_addr = builder.CreateGEP(Var_addr, {CONST(0), Exp_val}, node.var->id);
     }
     
