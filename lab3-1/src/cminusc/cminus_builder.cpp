@@ -120,8 +120,6 @@ void CminusBuilder::visit(syntax_fun_declaration &node)
     }
     node.compound_stmt->accept(*this);
     scope.exit();
-    if (node.id == "main")
-        builder.ClearInsertionPoint();
     printf("fun_declaration end:\n");
 }
 
@@ -263,6 +261,7 @@ void CminusBuilder::visit(syntax_return_stmt &node)
     printf("return_stmt begin:\n");
     if (node.expression == nullptr)
     {
+        builder.CreateRetVoid();
         return;
     }
     else
@@ -351,7 +350,9 @@ void CminusBuilder::visit(syntax_simple_expression &node)
         }
         else if (node.op == OP_EQ)
         {
+            printf("EQ begin:\n");
             Exp_val = builder.CreateICmpEQ(addiexpr1, addiexpr2);
+            printf("EQ end:\n");
         }
         else if (node.op == OP_NEQ)
         {
