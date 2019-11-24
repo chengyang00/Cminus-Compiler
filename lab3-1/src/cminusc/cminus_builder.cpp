@@ -12,17 +12,19 @@ Value *Var_addr;
 // int var_addr;
 int stmt_num;
 
+#define TyInt32 llvm::Type::getInt32Ty(context)
+
 // You can define global variables here
 // to store state
 
 void CminusBuilder::visit(syntax_program &node)
 {
+    printf("program begin:\n");
     for (auto decl : node.declarations)
     {
-        printf("program begin:\n");
         decl->accept(*this);
-        printf("program end:\n");
     }
+    printf("program end:\n");
 }
 
 void CminusBuilder::visit(syntax_num &node)
@@ -77,7 +79,6 @@ void CminusBuilder::visit(syntax_fun_declaration &node)
 {
     printf("fun_declaration begin:\n");
     auto TyVoid = llvm::Type::getVoidTy(context);
-    auto TyInt32 = llvm::Type::getInt32Ty(context);
     std::vector<Type *> Ints(node.params.size(), TyInt32);
     FunctionType *fun_type;
     if (node.params.size() > 0)
@@ -107,7 +108,9 @@ void CminusBuilder::visit(syntax_fun_declaration &node)
                                       GlobalValue::LinkageTypes::ExternalLinkage,
                                       node.id, module.get());
     func = Fun;
-    auto bb = BasicBlock::Create(context, "entry", func);
+    auto bb = BasicBlock::Create(context, "entry", Fun);
+    // BasicBlock entry 
+    builder.SetInsertPoint(bb);
     scope.push(node.id, Fun);
     scope.enter();
     printf("scope.enter:\n");
@@ -117,28 +120,29 @@ void CminusBuilder::visit(syntax_fun_declaration &node)
     }
     node.compound_stmt->accept(*this);
     scope.exit();
+    if (node.id == "main")
+        builder.ClearInsertionPoint();
     printf("fun_declaration end:\n");
 }
 
 void CminusBuilder::visit(syntax_param &node)
 {
     printf("param begin:\n");
-    Type *TYPE32 = Type::getInt32Ty(context);
     printf("1:\n");
-    if (node.isarray)
+    if (node.type == TYPE_INT)
     {
-        printf("2:\n");
-        auto uAlloca = builder.CreateAlloca(ArrayType::getInt32PtrTy(context));
-        scope.push(node.id, uAlloca);
-    }
-    else
-    {
-        printf("3:\n");
-        //auto bb = BasicBlock::Create(context, "entry", func);
-        llvm::Value *uAlloca = builder.CreateAlloca(TYPE32);
-        std::string name = node.id;
-        printf("4\n");
-        scope.push(name, uAlloca);
+        if (node.isarray)
+        {
+            printf("2:\n");
+            auto uAlloca = builder.CreateAlloca(ArrayType::getInt32PtrTy(context));
+            scope.push(node.id, uAlloca);
+        }
+        else
+        {
+            printf("3:\n");
+            auto uAlloca = builder.CreateAlloca(TyInt32);
+            scope.push(node.id, uAlloca);
+        }
     }
     printf("param end:\n");
 }
