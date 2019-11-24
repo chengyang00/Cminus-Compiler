@@ -19,8 +19,8 @@ except:                                           ; preds = %entry
   ret i32 0
 
 normal:                                           ; preds = %entry
-  %array = getelementptr [2 x i32], [2 x i32]* %1, i32 0, i32 0
-  store i32 0, i32* %array
+  %2 = getelementptr [2 x i32], [2 x i32]* %1, i32 0, i32 0
+  store i32 0, i32* %2
   br i1 true, label %normal2, label %except1
 
 except1:                                          ; preds = %normal
@@ -28,33 +28,36 @@ except1:                                          ; preds = %normal
   ret i32 0
 
 normal2:                                          ; preds = %normal
-  %array3 = getelementptr [2 x i32], [2 x i32]* %1, i32 0, i32 1
-  store i32 2, i32* %array3
+  %3 = getelementptr [2 x i32], [2 x i32]* %1, i32 0, i32 1
+  store i32 2, i32* %3
   store i32 3, i32* %0
-  br i1 true, label %normal5, label %except4
+  br i1 true, label %normal4, label %except3
 
-trueBB:                                           ; preds = %normal8
+trueBB:                                           ; preds = %normal6
   ret i32 0
 
-falseBB:                                          ; preds = %normal8
+falseBB:                                          ; preds = %normal6
   ret i32 1
 
-except4:                                          ; preds = %normal2
+endBB:                                            ; No predecessors!
+  ret i32 0
+
+except3:                                          ; preds = %normal2
   call void @neg_idx_except()
   ret i32 0
 
-normal5:                                          ; preds = %normal2
-  %array6 = getelementptr [2 x i32], [2 x i32]* %1, i32 0, i32 1
-  %2 = load i32, i32* %array6
-  br i1 true, label %normal8, label %except7
+normal4:                                          ; preds = %normal2
+  %array = getelementptr [2 x i32], [2 x i32]* %1, i32 0, i32 1
+  %4 = load i32, i32* %array
+  br i1 true, label %normal6, label %except5
 
-except7:                                          ; preds = %normal5
+except5:                                          ; preds = %normal4
   call void @neg_idx_except()
   ret i32 0
 
-normal8:                                          ; preds = %normal5
-  %array9 = getelementptr [2 x i32], [2 x i32]* %1, i32 0, i32 0
-  %3 = load i32, i32* %array9
-  %4 = icmp sgt i32 %2, %3
-  br i1 %4, label %trueBB, label %falseBB
+normal6:                                          ; preds = %normal4
+  %array7 = getelementptr [2 x i32], [2 x i32]* %1, i32 0, i32 0
+  %5 = load i32, i32* %array7
+  %6 = icmp sgt i32 %4, %5
+  br i1 %6, label %trueBB, label %falseBB
 }
