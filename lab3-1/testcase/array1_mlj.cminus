@@ -6,7 +6,8 @@ int main(void)
 	array[1]=2;
 	a = 3;
 	if(array[1] > array[0])
-		return 0;
+		output(0);
 	else
-		return 1;	
+		output(1);
+	return 0;
 }
