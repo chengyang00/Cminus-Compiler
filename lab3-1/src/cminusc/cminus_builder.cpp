@@ -276,6 +276,7 @@ void CminusBuilder::visit(syntax_return_stmt &node)
 void CminusBuilder::visit(syntax_var &node)
 {
     printf("var begin:\n");
+    llvm::Value *Var_addr = builder.CreateAlloca(TyInt32);
     if (node.expression != nullptr)
     {
         node.expression->accept(*this);
@@ -292,7 +293,6 @@ void CminusBuilder::visit(syntax_var &node)
         {
             auto *except = module->getFunction("neg_idx_except");
             builder.CreateCall(except);
-            //未完成
         }
         else
         {
@@ -305,12 +305,46 @@ void CminusBuilder::visit(syntax_var &node)
         std::string name = node.id;
         Var_addr = scope.find(name);
     }
+    /*int *addr;
+    ConstantInt *C = dyn_cast<ConstantInt>(Var_addr);
+    addr = C->getSExtValue();*/
+    Exp_val = builder.CreateLoad(Var_addr);
     printf("var end:\n");
 }
 
 void CminusBuilder::visit(syntax_assign_expression &node)
 {
     printf("assign_expression begin:\n");
+    /*llvm::Value *Var_addr = builder.CreateAlloca(TyInt32);
+    if (node.var->expression != nullptr)
+    {
+        node.var->expression->accept(*this);
+        int Index;
+        if (ConstantInt *CI = dyn_cast<ConstantInt>(Exp_val))
+        {
+            if (CI->getBitWidth() <= 32)
+            {
+                Index = CI->getSExtValue();
+            }
+        }
+
+        if (Index < 0)
+        {
+            auto *except = module->getFunction("neg_idx_except");
+            builder.CreateCall(except);
+        }
+        else
+        {
+            Value *addr = scope.find(node.var->id);
+            Var_addr = builder.CreateGEP(addr, Exp_val, "array");
+        }
+    }
+    else
+    {
+        std::string name = node.var->id;
+        Var_addr = scope.find(name);
+    }*/
+    
     node.var->accept(*this);
     //调用 var 得到地址后，直接使用。
     node.expression->accept(*this);
