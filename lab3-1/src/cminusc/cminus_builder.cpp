@@ -7,8 +7,9 @@ using namespace std;
 
 Function *func;
 Value *Exp_val;
+Value *Bool_val;
 // int exp_val;
-Value *Var_addr;
+//Value *Var_addr;
 // int var_addr;
 int stmt_num;
 
@@ -113,7 +114,6 @@ void CminusBuilder::visit(syntax_fun_declaration &node)
     builder.SetInsertPoint(bb);
     scope.push(node.id, Fun);
     scope.enter();
-    printf("scope.enter:\n");
     for (auto i : node.params)
     {
         i->accept(*this);
@@ -186,8 +186,8 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
             auto endBB = llvm::BasicBlock::Create(context, "endBB", func);
 
             node.expression->accept(*this);
-            auto icmp = builder.CreateICmpNE(Exp_val, CONST(0));
-            auto br = builder.CreateCondBr(icmp, trueBB, falseBB);
+            // auto icmp = builder.CreateICmpNE(Exp_val, CONST(0));
+            auto br = builder.CreateCondBr(Exp_val, trueBB, falseBB);
 
             builder.SetInsertPoint(trueBB);
             node.if_statement->accept(*this);
@@ -206,8 +206,9 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
             auto endBB = llvm::BasicBlock::Create(context, "endBB", func);
 
             node.expression->accept(*this);
-            auto icmp = builder.CreateICmpNE(Exp_val, CONST(0));
-            auto br = builder.CreateCondBr(icmp, trueBB, endBB);
+            // auto icmp = builder.CreateICmpNE(Exp_val, CONST(0));
+            printf("select begin:\n");
+            auto br = builder.CreateCondBr(Exp_val, trueBB, endBB);
 
             builder.SetInsertPoint(trueBB);
             node.if_statement->accept(*this);
@@ -223,8 +224,8 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
             auto falseBB = llvm::BasicBlock::Create(context, "falseBB", func);
 
             node.expression->accept(*this);
-            auto icmp = builder.CreateICmpNE(Exp_val, CONST(0));
-            auto br = builder.CreateCondBr(icmp, trueBB, falseBB);
+            // auto icmp = builder.CreateICmpNE(Exp_val, CONST(0));
+            auto br = builder.CreateCondBr(Exp_val, trueBB, falseBB);
 
             builder.SetInsertPoint(trueBB);
             node.if_statement->accept(*this);
@@ -275,7 +276,7 @@ void CminusBuilder::visit(syntax_return_stmt &node)
 void CminusBuilder::visit(syntax_var &node)
 {
     printf("var begin:\n");
-    llvm::Value *Var_addr = builder.CreateAlloca(TyInt32);
+    llvm::Value *Var_addr;
     if (node.expression != nullptr)
     {
         node.expression->accept(*this);
@@ -314,7 +315,7 @@ void CminusBuilder::visit(syntax_var &node)
 void CminusBuilder::visit(syntax_assign_expression &node)
 {
     printf("assign_expression begin:\n");
-    /*llvm::Value *Var_addr = builder.CreateAlloca(TyInt32);
+    llvm::Value *Var_addr;
     if (node.var->expression != nullptr)
     {
         node.var->expression->accept(*this);
@@ -342,9 +343,9 @@ void CminusBuilder::visit(syntax_assign_expression &node)
     {
         std::string name = node.var->id;
         Var_addr = scope.find(name);
-    }*/
+    }
     
-    node.var->accept(*this);
+    //node.var->accept(*this);
     //调用 var 得到地址后，直接使用。
     node.expression->accept(*this);
     //llvm::APInt addr = llvm::APInt(32, var_addr);
@@ -411,11 +412,11 @@ void CminusBuilder::visit(syntax_additive_expression &node)
         auto term = Exp_val;
         if (node.op == OP_PLUS)
         {
-            builder.CreateNSWAdd(addiexpr, term);
+            Exp_val = builder.CreateNSWAdd(addiexpr, term);
         }
         else if (node.op == OP_MINUS)
         {
-            builder.CreateNSWSub(addiexpr, term);
+            Exp_val = builder.CreateNSWSub(addiexpr, term);
         }
     }
     printf("additive_expression end:\n");
