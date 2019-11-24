@@ -3,17 +3,18 @@ int gcd (int u, int v) {
   else return gcd(v, u - u / v * v);
 }
 
-int main(void) {
+void main(void) {
   int x;
   int y;
   int temp;
-  x = 18;
-  y = 72;
+  x = input();
+  y = input();
   if (x < y) {
     temp = x;
     x = y;
     y = temp;
   }
   temp = gcd(x, y);
-  return temp;
+  output(temp);
+  return;
 }

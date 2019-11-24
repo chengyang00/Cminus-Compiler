@@ -118,6 +118,18 @@ void CminusBuilder::visit(syntax_fun_declaration &node)
     {
         i->accept(*this);
     }
+    std::vector<Value *> args; //获取gcd函数的参数,通过iterator
+    for (auto arg = Fun->arg_begin(); arg != Fun->arg_end(); arg++)
+    {
+        args.push_back(arg);
+    }
+    int index = 0;
+    for (auto i : node.params)
+    {
+        auto id1 = scope.find(i->id);
+        builder.CreateStore(args[index], id1);
+        index++;
+    }
     node.compound_stmt->accept(*this);
     scope.exit();
     printf("fun_declaration end:\n");
@@ -349,6 +361,7 @@ void CminusBuilder::visit(syntax_assign_expression &node)
     node.expression->accept(*this);
     //llvm::APInt addr = llvm::APInt(32, var_addr);
     //llvm::APInt val = llvm::APInt(32, exp_val);
+    // outs()<<Exp_val->getType()->getTypeID()<<'\n';
     builder.CreateStore(Exp_val, Var_addr);
     printf("assign_expression end:\n");
 }
@@ -456,9 +469,9 @@ void CminusBuilder::visit(syntax_call &node)
         (*s)->accept(*this);
         Argu.push_back(Exp_val);
     }
-    if (CalleeF->getType() == TyInt32)
-        Exp_val = builder.CreateCall(CalleeF, Argu);
-    else
-        builder.CreateCall(CalleeF, Argu);
+    // if (CalleeF->getType() == TyInt32)
+    Exp_val = builder.CreateCall(CalleeF, Argu);
+    // else
+    //     builder.CreateCall(CalleeF, Argu);
     printf("call end:\n");
 }
