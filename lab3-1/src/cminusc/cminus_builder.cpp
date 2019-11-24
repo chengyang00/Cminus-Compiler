@@ -110,13 +110,25 @@ void CminusBuilder::visit(syntax_fun_declaration &node)
                                       node.id, module.get());
     func = Fun;
     auto bb = BasicBlock::Create(context, "entry", Fun);
-    // BasicBlock entry 
+    // BasicBlock entry
     builder.SetInsertPoint(bb);
     scope.push(node.id, Fun);
     scope.enter();
     for (auto i : node.params)
     {
         i->accept(*this);
+    }
+    std::vector<Value *> args; //获取gcd函数的参数,通过iterator
+    for (auto arg = Fun->arg_begin(); arg != Fun->arg_end(); arg++)
+    {
+        args.push_back(arg);
+    }
+    int index = 0;
+    for (auto i : node.params)
+    {
+        auto id1 = scope.find(i->id);
+        builder.CreateStore(args[index], id1);
+        index++;
     }
     node.compound_stmt->accept(*this);
     scope.exit();
@@ -126,18 +138,15 @@ void CminusBuilder::visit(syntax_fun_declaration &node)
 void CminusBuilder::visit(syntax_param &node)
 {
     printf("param begin:\n");
-    printf("1:\n");
     if (node.type == TYPE_INT)
     {
         if (node.isarray)
         {
-            printf("2:\n");
             auto uAlloca = builder.CreateAlloca(ArrayType::getInt32PtrTy(context));
             scope.push(node.id, uAlloca);
         }
         else
         {
-            printf("3:\n");
             auto uAlloca = builder.CreateAlloca(TyInt32);
             scope.push(node.id, uAlloca);
         }
@@ -159,8 +168,9 @@ void CminusBuilder::visit(syntax_compound_stmt &node)
     }
     for (auto stmt : node.statement_list)
     {
-        stmt->accept(*this);
         stmt_num--;
+        printf("syntax_compound_stmt stmt_num: %d\n", stmt_num);
+        stmt->accept(*this);
     }
     scope.exit();
     printf("compound_stmt end:\n");
@@ -198,7 +208,7 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
             node.else_statement->accept(*this);
             builder.CreateBr(endBB);
 
-            builder.CreateBr(endBB);
+            // builder.CreateBr(endBB);
             builder.SetInsertPoint(endBB);
         }
         else
@@ -213,7 +223,7 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
 
             builder.SetInsertPoint(trueBB);
             node.if_statement->accept(*this);
-
+            builder.CreateBr(endBB);
             builder.SetInsertPoint(endBB);
         }
     }
@@ -241,21 +251,21 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
 
 void CminusBuilder::visit(syntax_iteration_stmt &node)
 {
-    std::cout<<"iteration_stmt begin"<<endl;
-    //printf("iteration_stmt beign:\n");
+    printf("iteration_stmt beign:\n");
+    auto jugBB = llvm::BasicBlock::Create(context, "jugBB", func);
     auto trueBB = llvm::BasicBlock::Create(context, "trueBB", func);
     auto falseBB = llvm::BasicBlock::Create(context, "falseBB", func);
-    auto jugBB = llvm::BasicBlock::Create(context, "jugBB", func);
 
+    builder.CreateBr(jugBB);
     builder.SetInsertPoint(jugBB);
     node.expression->accept(*this);
-    auto icmp = builder.CreateICmpNE(Exp_val, CONST(0)); //表达式的值
-    auto br = builder.CreateCondBr(icmp, trueBB, falseBB);
+    auto br = builder.CreateCondBr(Exp_val, trueBB, falseBB);
 
     builder.SetInsertPoint(trueBB);
     node.statement->accept(*this);
     builder.CreateBr(jugBB);
 
+    printf("stmt_num: %d\n", stmt_num);
     builder.SetInsertPoint(falseBB);
     std::cout<<"iteration_stmt end"<<endl;
     //printf("iteration_stmt end:\n");
@@ -370,6 +380,7 @@ void CminusBuilder::visit(syntax_assign_expression &node)
     node.expression->accept(*this);
     //llvm::APInt addr = llvm::APInt(32, var_addr);
     //llvm::APInt val = llvm::APInt(32, exp_val);
+    // outs()<<Exp_val->getType()->getTypeID()<<'\n';
     builder.CreateStore(Exp_val, Var_addr);
     //printf("assign_expression end:\n");
     std::cout<<"assign_expression end"<<endl;
