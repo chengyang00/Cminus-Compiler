@@ -4,7 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "~/git/teamwork/lab3-1"
+                "~/git/teamwork/lab3-1",
+                "${workspaceFolder}/deps"
             ],
             "defines": [],
             "compilerPath": "/home/tobedeligent/git/llvm-build/bin/clang",
