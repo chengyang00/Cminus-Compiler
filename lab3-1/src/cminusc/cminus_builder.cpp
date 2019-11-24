@@ -176,7 +176,8 @@ void CminusBuilder::visit(syntax_expresion_stmt &node)
 
 void CminusBuilder::visit(syntax_selection_stmt &node)
 {
-    printf("selection_stmt begin:\n");
+    std::cout<<"selection_stmt begin"<<endl;
+    //printf("selection_stmt begin:\n");
     if (stmt_num > 0)
     {
         if (node.else_statement != nullptr)
@@ -207,7 +208,7 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
 
             node.expression->accept(*this);
             // auto icmp = builder.CreateICmpNE(Exp_val, CONST(0));
-            printf("select begin:\n");
+            //printf("select begin:\n");
             auto br = builder.CreateCondBr(Exp_val, trueBB, endBB);
 
             builder.SetInsertPoint(trueBB);
@@ -234,12 +235,14 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
             node.else_statement->accept(*this);
         }
     }
-    printf("selection_stmt end:\n");
+    std::cout<<"selection_stmt end"<<endl;
+    //printf("selection_stmt end:\n");
 }
 
 void CminusBuilder::visit(syntax_iteration_stmt &node)
 {
-    printf("iteration_stmt beign:\n");
+    std::cout<<"iteration_stmt begin"<<endl;
+    //printf("iteration_stmt beign:\n");
     auto trueBB = llvm::BasicBlock::Create(context, "trueBB", func);
     auto falseBB = llvm::BasicBlock::Create(context, "falseBB", func);
     auto jugBB = llvm::BasicBlock::Create(context, "jugBB", func);
@@ -254,12 +257,14 @@ void CminusBuilder::visit(syntax_iteration_stmt &node)
     builder.CreateBr(jugBB);
 
     builder.SetInsertPoint(falseBB);
-    printf("iteration_stmt end:\n");
+    std::cout<<"iteration_stmt end"<<endl;
+    //printf("iteration_stmt end:\n");
 }
 
 void CminusBuilder::visit(syntax_return_stmt &node)
 {
-    printf("return_stmt begin:\n");
+    std::cout<<"return_stmt begin"<<endl;
+    //printf("return_stmt begin:\n");
     if (node.expression == nullptr)
     {
         builder.CreateRetVoid();
@@ -270,17 +275,19 @@ void CminusBuilder::visit(syntax_return_stmt &node)
         node.expression->accept(*this); //得到expression的值
         builder.CreateRet(Exp_val);     //全局变量 表达式的值
     }
-    printf("return_stmt end:\n");
+    std::cout<<"return_stmt end"<<endl;
+    //printf("return_stmt end:\n");
 }
 
 void CminusBuilder::visit(syntax_var &node)
 {
-    printf("var begin:\n");
-    llvm::Value *Var_addr;
+    std::cout<<"var begin"<<endl;
+    llvm::Value *Var_addr = scope.find(node.id);
     if (node.expression != nullptr)
     {
         node.expression->accept(*this);
-        int Index;
+        Var_addr = builder.CreateGEP(Var_addr, {CONST(0),Exp_val}, node.id);
+        /*int Index;
         if (ConstantInt *CI = dyn_cast<ConstantInt>(Exp_val))
         {
             if (CI->getBitWidth() <= 32)
@@ -298,23 +305,19 @@ void CminusBuilder::visit(syntax_var &node)
         {
             Value *addr = scope.find(node.id);
             Var_addr = builder.CreateGEP(addr, Exp_val, "array");
-        }
-    }
-    else
-    {
-        std::string name = node.id;
-        Var_addr = scope.find(name);
+        }*/
     }
     /*int *addr;
     ConstantInt *C = dyn_cast<ConstantInt>(Var_addr);
     addr = C->getSExtValue();*/
     Exp_val = builder.CreateLoad(Var_addr);
-    printf("var end:\n");
+    std::cout<<"var end"<<endl;
 }
 
 void CminusBuilder::visit(syntax_assign_expression &node)
 {
-    printf("assign_expression begin:\n");
+    //printf("assign_expression begin:\n");
+    std::cout<<"assign_expression begin"<<endl;
     llvm::Value *Var_addr = scope.find(node.var->id);
     if (node.var->expression != nullptr)
     {
@@ -339,7 +342,7 @@ void CminusBuilder::visit(syntax_assign_expression &node)
             Var_addr = builder.CreateGEP(addr, Exp_val, "array");
         }*/
         //无下标越界检查
-        Var_addr = builder.CreateGEP(Var_addr, Exp_val, node.var->id);
+        Var_addr = builder.CreateGEP(Var_addr, {CONST(0), Exp_val}, node.var->id);
     }
     
     
@@ -349,12 +352,14 @@ void CminusBuilder::visit(syntax_assign_expression &node)
     //llvm::APInt addr = llvm::APInt(32, var_addr);
     //llvm::APInt val = llvm::APInt(32, exp_val);
     builder.CreateStore(Exp_val, Var_addr);
-    printf("assign_expression end:\n");
+    //printf("assign_expression end:\n");
+    std::cout<<"assign_expression end"<<endl;
 }
 
 void CminusBuilder::visit(syntax_simple_expression &node)
 {
-    printf("simple_expression begin:\n");
+    std::cout<<"simple_expression begin"<<endl;
+    //printf("simple_expression begin:\n");
     if (node.additive_expression_r == nullptr)
     {
         node.additive_expression_l->accept(*this);
@@ -383,21 +388,23 @@ void CminusBuilder::visit(syntax_simple_expression &node)
         }
         else if (node.op == OP_EQ)
         {
-            printf("EQ begin:\n");
+            //printf("EQ begin:\n");
             Exp_val = builder.CreateICmpEQ(addiexpr1, addiexpr2);
-            printf("EQ end:\n");
+            //printf("EQ end:\n");
         }
         else if (node.op == OP_NEQ)
         {
             Exp_val = builder.CreateICmpNE(addiexpr1, addiexpr2);
         }
     }
-    printf("simple_expression end:\n");
+    std::cout<<"simple_expression end"<<endl;
+    //printf("simple_expression end:\n");
 }
 
 void CminusBuilder::visit(syntax_additive_expression &node)
 {
-    printf("additive_expression begin:\n");
+    std::cout<<"additive_expression begin"<<endl;
+    //printf("additive_expression begin:\n");
     if (node.additive_expression == nullptr)
     {
         node.term->accept(*this);
@@ -417,12 +424,14 @@ void CminusBuilder::visit(syntax_additive_expression &node)
             Exp_val = builder.CreateNSWSub(addiexpr, term);
         }
     }
-    printf("additive_expression end:\n");
+    //printf("additive_expression end:\n");
+    std::cout<<"additive_expression end"<<endl;
 }
 
 void CminusBuilder::visit(syntax_term &node)
 {
-    printf("term begin:\n");
+    std::cout<<"term begin"<<endl;
+    //printf("term begin:\n");
     if (node.term == nullptr)
     {
         node.factor->accept(*this);
@@ -442,12 +451,14 @@ void CminusBuilder::visit(syntax_term &node)
             Exp_val = builder.CreateSDiv(term, factor);
         }
     }
-    printf("term end:\n");
+    //printf("term end:\n");
+    std::cout<<"term end"<<endl;
 }
 
 void CminusBuilder::visit(syntax_call &node)
 {
-    printf("call begin:\n");
+    std::cout<<"call begin"<<endl;
+    //printf("call begin:\n");
     auto CalleeF = scope.find(node.id);
     vector<Value *> Argu;
     for (auto s = node.args.begin(); s != node.args.end(); s++)
@@ -456,5 +467,6 @@ void CminusBuilder::visit(syntax_call &node)
         Argu.push_back(Exp_val);
     }
     builder.CreateCall(CalleeF, Argu);
-    printf("call end:\n");
+    //printf("call end:\n");
+    std::cout<<"call end"<<endl;
 }

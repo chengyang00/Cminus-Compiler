@@ -1,11 +1,9 @@
 int main(void)
 {
 	int array[2];
-	int a;
 	array[0] = 1;
 	array[1] = 2;
-	a = 3;
-	if(a > 0){
+	if(array[1] > array[0]){
 		return 0;
 	}
 	return 1;
