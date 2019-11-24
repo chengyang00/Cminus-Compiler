@@ -197,7 +197,7 @@ void CminusBuilder::visit(syntax_expresion_stmt &node)
 void CminusBuilder::visit(syntax_selection_stmt &node)
 {
     // std::cout<<"selection_stmt begin"<<endl;
-    printf("selection_stmt begin:\n");
+    // printf("selection_stmt begin:\n");
     if (stmt_num > 0)
     {
         if (node.else_statement != nullptr)
@@ -232,7 +232,7 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
 
             node.expression->accept(*this);
             // auto icmp = builder.CreateICmpNE(Exp_val, CONST(0));
-            printf("select begin:\n");
+            // printf("select begin:\n");
             auto br = builder.CreateCondBr(Exp_val, trueBB, endBB);
 
             builder.SetInsertPoint(trueBB);
@@ -260,7 +260,7 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
         }
     }
     // std::cout<<"selection_stmt end"<<endl;
-    printf("selection_stmt end:\n");
+    // printf("selection_stmt end:\n");
 }
 
 void CminusBuilder::visit(syntax_iteration_stmt &node)
@@ -282,13 +282,13 @@ void CminusBuilder::visit(syntax_iteration_stmt &node)
     // printf("stmt_num: %d\n", stmt_num);
     builder.SetInsertPoint(l_falseBB);
     // std::cout<<"iteration_stmt end"<<endl;
-    printf("iteration_stmt end:\n");
+    // printf("iteration_stmt end:\n");
 }
 
 void CminusBuilder::visit(syntax_return_stmt &node)
 {
     // std::cout<<"return_stmt begin"<<endl;
-    printf("return_stmt begin:\n");
+    // printf("return_stmt begin:\n");
     if (node.expression == nullptr)
     {
         builder.CreateRetVoid();
@@ -300,7 +300,7 @@ void CminusBuilder::visit(syntax_return_stmt &node)
         builder.CreateRet(Exp_val);     //全局变量 表达式的值
     }
     // std::cout<<"return_stmt end"<<endl;
-    printf("return_stmt end:\n");
+    // printf("return_stmt end:\n");
 }
 
 void CminusBuilder::visit(syntax_var &node)
@@ -349,7 +349,7 @@ void CminusBuilder::visit(syntax_var &node)
 
 void CminusBuilder::visit(syntax_assign_expression &node)
 {
-    printf("assign_expression begin:\n");
+    // printf("assign_expression begin:\n");
     // std::cout<<"assign_expression begin"<<endl;
     llvm::Value *Var_addr = scope.find(node.var->id);
     if (node.var->expression != nullptr)
@@ -381,14 +381,14 @@ void CminusBuilder::visit(syntax_assign_expression &node)
     node.expression->accept(*this);
     
     builder.CreateStore(Exp_val, Var_addr);
-    printf("assign_expression end:\n");
+    // printf("assign_expression end:\n");
     // std::cout<<"assign_expression end"<<endl;
 }
 
 void CminusBuilder::visit(syntax_simple_expression &node)
 {
     // std::cout<<"simple_expression begin"<<endl;
-    printf("simple_expression begin:\n");
+    // printf("simple_expression begin:\n");
     if (node.additive_expression_r == nullptr)
     {
         node.additive_expression_l->accept(*this);
@@ -417,9 +417,9 @@ void CminusBuilder::visit(syntax_simple_expression &node)
         }
         else if (node.op == OP_EQ)
         {
-            printf("EQ begin:\n");
+            // printf("EQ begin:\n");
             Exp_val = builder.CreateICmpEQ(addiexpr1, addiexpr2);
-            printf("EQ end:\n");
+            // printf("EQ end:\n");
         }
         else if (node.op == OP_NEQ)
         {
@@ -427,13 +427,13 @@ void CminusBuilder::visit(syntax_simple_expression &node)
         }
     }
     // std::cout<<"simple_expression end"<<endl;
-    printf("simple_expression end:\n");
+    // printf("simple_expression end:\n");
 }
 
 void CminusBuilder::visit(syntax_additive_expression &node)
 {
     // std::cout<<"additive_expression begin"<<endl;
-    printf("additive_expression begin:\n");
+    // printf("additive_expression begin:\n");
     if (node.additive_expression == nullptr)
     {
         node.term->accept(*this);
@@ -453,14 +453,14 @@ void CminusBuilder::visit(syntax_additive_expression &node)
             Exp_val = builder.CreateNSWSub(addiexpr, term);
         }
     }
-    printf("additive_expression end:\n");
+    // printf("additive_expression end:\n");
     // std::cout<<"additive_expression end"<<endl;
 }
 
 void CminusBuilder::visit(syntax_term &node)
 {
     // std::cout<<"term begin"<<endl;
-    printf("term begin:\n");
+    // printf("term begin:\n");
     if (node.term == nullptr)
     {
         node.factor->accept(*this);
