@@ -300,7 +300,12 @@ void CminusBuilder::visit(syntax_var &node)
     if (node.expression != nullptr)
     {
         node.expression->accept(*this);
-        Var_addr = builder.CreateGEP(Var_addr, {CONST(0),Exp_val}, node.id);
+        if(Var_addr->getType()->getPointerElementType()->isArrayTy())
+            Var_addr = builder.CreateGEP(Var_addr, {CONST(0),Exp_val}, node.id);
+        else{
+            Var_addr = builder.CreateLoad(Var_addr);
+            Var_addr = builder.CreateGEP(Var_addr,Exp_val);
+        }
         /*auto icmp = builder.CreateICmpSGE(Exp_val, CONST(0));
 
         auto normal = BasicBlock::Create(context, "normal", func);
@@ -343,7 +348,16 @@ void CminusBuilder::visit(syntax_var &node)
     /*int *addr;
     ConstantInt *C = dyn_cast<ConstantInt>(Var_addr);
     addr = C->getSExtValue();*/
-    Exp_val = builder.CreateLoad(Var_addr);
+    if (Var_addr->getType()->getPointerElementType()->isArrayTy()){
+        Exp_val = Var_addr;
+        printf("ararararararrarararararararararararararararararararararara\n");
+    }
+        
+    else{
+        Exp_val = builder.CreateLoad(Var_addr);
+        printf("itititititiititititititiitititititititititititiitititititi\n");
+    }
+        
     std::cout<<"var end"<<endl;
 }
 
@@ -498,6 +512,8 @@ void CminusBuilder::visit(syntax_call &node)
     for (auto s = node.args.begin(); s != node.args.end(); s++)
     {
         (*s)->accept(*this);
+        if(Exp_val->getType()->isPointerTy())
+            Exp_val = builder.CreateInBoundsGEP(Exp_val,{CONST(0),CONST(0)});
         Argu.push_back(Exp_val);
     }
     builder.CreateCall(CalleeF, Argu);

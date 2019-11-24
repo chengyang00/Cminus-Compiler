@@ -25,8 +25,13 @@ entry:
   br i1 %4, label %trueBB, label %falseBB
 
 trueBB:                                           ; preds = %entry
-  ret i32 0
+  call void @output(i32 0)
+  br label %endBB
 
 falseBB:                                          ; preds = %entry
-  ret i32 1
+  call void @output(i32 1)
+  br label %endBB
+
+endBB:                                            ; preds = %falseBB, %trueBB
+  ret i32 0
 }
