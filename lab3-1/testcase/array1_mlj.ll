@@ -10,21 +10,18 @@ declare void @neg_idx_except()
 
 define i32 @main() {
 entry:
-  %0 = alloca [2 x i32]
-  %array = getelementptr [2 x i32], [2 x i32]* %0, i32 0, i32 0
-  store i32 1, i32* %array
-  %array1 = getelementptr [2 x i32], [2 x i32]* %0, i32 0, i32 1
-  store i32 2, i32* %array1
-  %array2 = getelementptr [2 x i32], [2 x i32]* %0, i32 0, i32 1
-  %1 = load i32, i32* %array2
-  %array3 = getelementptr [2 x i32], [2 x i32]* %0, i32 0, i32 0
-  %2 = load i32, i32* %array3
-  %3 = icmp sgt i32 %1, %2
-  br i1 %3, label %trueBB, label %endBB
+  %0 = alloca i32
+  %1 = alloca [2 x i32]
+  %array = getelementptr [2 x i32], [2 x i32]* %1, i32 0
+  store i32 0, [2 x i32]* %array
+  %array1 = getelementptr [2 x i32], [2 x i32]* %1, i32 1
+  store i32 2, [2 x i32]* %array1
+  store i32 3, i32* %0
+  br i1 true, label %trueBB, label %falseBB
 
 trueBB:                                           ; preds = %entry
   ret i32 0
 
-endBB:                                            ; preds = %entry
+falseBB:                                          ; preds = %entry
   ret i32 1
 }
