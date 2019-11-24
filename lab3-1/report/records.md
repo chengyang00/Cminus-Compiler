@@ -18,7 +18,7 @@
 
 【图片】
 
-<img src="/picture/image-1.png" alt="image-20191124212027361" style="zoom: 50%;" />
+![1](./picture/image-1.png)
 
 ### 过程描述
 
@@ -29,11 +29,11 @@
 
 #### 任务分配
 
-缪立君：6 7 8 9 10 11 12（数字为函数的次序）
+缪立君：6 7 8 9 10（数字为函数的次序）
 
 李晨昊：1 2 3 4 5
 
-杨城：13 14 15 16
+杨城：11 12 13 14 15 16
 
 #### Deadline
 
@@ -51,7 +51,7 @@
 
 【照片】
 
-<img src="/picture/image-2.png" alt="image-20191124212209655" style="zoom:67%;" />
+<img src="./picture/image-2.png" alt="1" style="zoom: 80%;" />
 
 ### 过程描述
 
@@ -73,7 +73,7 @@
 
 【图片】
 
-<img src="/picture/image-3.png" alt="image-20191124212324074" style="zoom:67%;" />
+<img src="./picture/image-3.png" alt="1" style="zoom: 67%;" />
 
 ### 过程描述
 
@@ -95,7 +95,7 @@
 
 【图片】
 
-<img src="/picture/image-4.png" alt="image-20191124212443555" style="zoom: 50%;" />
+<img src="./picture/image-4.png" alt="1" style="zoom:50%;" />
 
 ### 过程描述
 
