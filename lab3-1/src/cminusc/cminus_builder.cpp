@@ -480,14 +480,14 @@ void CminusBuilder::visit(syntax_term &node)
             Exp_val = builder.CreateSDiv(term, factor);
         }
     }
-    printf("term end:\n");
+    // printf("term end:\n");
     // std::cout<<"term end"<<endl;
 }
 
 void CminusBuilder::visit(syntax_call &node)
 {
     // std::cout<<"call begin"<<endl;
-    printf("call begin:\n");
+    // printf("call begin:\n");
     auto CalleeF = scope.find(node.id);
     vector<Value *> Argu;
     for (auto s = node.args.begin(); s != node.args.end(); s++)
@@ -498,6 +498,6 @@ void CminusBuilder::visit(syntax_call &node)
         Argu.push_back(Exp_val);
     }
     builder.CreateCall(CalleeF, Argu);
-    printf("call end:\n");
+    // printf("call end:\n");
     // std::cout<<"call end"<<endl;
 }
