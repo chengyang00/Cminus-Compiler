@@ -310,50 +310,22 @@ void CminusBuilder::visit(syntax_var &node)
     if (node.expression != nullptr)
     {
         node.expression->accept(*this);
+        auto icmp = builder.CreateICmpSGE(Exp_val, CONST(0));
+        auto except = BasicBlock::Create(context, "except", func);
+        auto normal = BasicBlock::Create(context, "normal", func);
+        auto br = builder.CreateCondBr(icmp, normal, except);
+        builder.SetInsertPoint(except);
+        auto neg = scope.find("neg_idx_except");
+        builder.CreateCall(neg);
+        builder.CreateRet(CONST(0));
+        builder.SetInsertPoint(normal);
         if(Var_addr->getType()->getPointerElementType()->isArrayTy())
             Var_addr = builder.CreateGEP(Var_addr, {CONST(0),Exp_val}, node.id);
         else{
             Var_addr = builder.CreateLoad(Var_addr);
             Var_addr = builder.CreateGEP(Var_addr,Exp_val);
         }
-        /*auto icmp = builder.CreateICmpSGE(Exp_val, CONST(0));
-
-        auto normal = BasicBlock::Create(context, "normal", func);
-        auto except = BasicBlock::Create(context, "except", func);
-        auto check_end = BasicBlock::Create(context, "check_end", func);
-        auto br = builder.CreateCondBr(icmp, normal, except);
-
-        builder.SetInsertPoint(normal);
-        Var_addr = builder.CreateGEP(Var_addr, {CONST(0),Exp_val}, node.id);
-        builder.CreateBr(check_end);
-
-        builder.SetInsertPoint(except);
-        auto neg = scope.find("neg_idx_except");
-        builder.CreateCall(neg);
-        //builder.CreateRet(call);
-
-        builder.CreateBr(check_end);
-
-        builder.SetInsertPoint(check_end);
-        /*int Index;
-        if (ConstantInt *CI = dyn_cast<ConstantInt>(Exp_val))
-        {
-            if (CI->getBitWidth() <= 32)
-            {
-                Index = CI->getSExtValue();
-            }
-        }
-
-        if (Index < 0)
-        {
-            auto *except = module->getFunction("neg_idx_except");
-            builder.CreateCall(except);
-        }
-        else
-        {
-            Value *addr = scope.find(node.id);
-            Var_addr = builder.CreateGEP(addr, Exp_val, "array");
-        }*/
+        
     }
     /*int *addr;
     ConstantInt *C = dyn_cast<ConstantInt>(Var_addr);
@@ -379,26 +351,16 @@ void CminusBuilder::visit(syntax_assign_expression &node)
     if (node.var->expression != nullptr)
     {
         node.var->expression->accept(*this);
-        /*int Index;
-        if (ConstantInt *CI = dyn_cast<ConstantInt>(Exp_val))
-        {
-            if (CI->getBitWidth() <= 32)
-            {
-                Index = CI->getSExtValue();
-            }
-        }
-
-        if (Index < 0)
-        {
-            auto *except = module->getFunction("neg_idx_except");
-            builder.CreateCall(except);
-        }
-        else
-        {
-            Value *addr = scope.find(node.var->id);
-            Var_addr = builder.CreateGEP(addr, Exp_val, "array");
-        }*/
-        //无下标越界检查
+        auto icmp = builder.CreateICmpSGE(Exp_val, CONST(0));
+        auto except = BasicBlock::Create(context, "except", func);
+        auto normal = BasicBlock::Create(context, "normal", func);
+        auto br = builder.CreateCondBr(icmp, normal, except);
+        builder.SetInsertPoint(except);
+        auto neg = scope.find("neg_idx_except");
+        builder.CreateCall(neg);
+        builder.CreateRet(CONST(0));
+        builder.SetInsertPoint(normal);
+        
         if(Var_addr->getType()->getPointerElementType()->isArrayTy())
             Var_addr = builder.CreateGEP(Var_addr, {CONST(0),Exp_val});
         else{
@@ -411,9 +373,7 @@ void CminusBuilder::visit(syntax_assign_expression &node)
     //node.var->accept(*this);
     //调用 var 得到地址后，直接使用。
     node.expression->accept(*this);
-    //llvm::APInt addr = llvm::APInt(32, var_addr);
-    //llvm::APInt val = llvm::APInt(32, exp_val);
-    // outs()<<Exp_val->getType()->getTypeID()<<'\n';
+    
     builder.CreateStore(Exp_val, Var_addr);
     //printf("assign_expression end:\n");
     std::cout<<"assign_expression end"<<endl;
