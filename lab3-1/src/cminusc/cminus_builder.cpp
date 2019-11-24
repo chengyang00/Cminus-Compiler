@@ -314,7 +314,7 @@ void CminusBuilder::visit(syntax_var &node)
 
         builder.SetInsertPoint(except);
         auto neg = scope.find("neg_idx_except");
-        auto call = builder.CreateCall(neg);
+        builder.CreateCall(neg);
         //builder.CreateRet(call);
 
         builder.CreateBr(check_end);
