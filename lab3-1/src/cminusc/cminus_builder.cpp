@@ -301,7 +301,7 @@ void CminusBuilder::visit(syntax_var &node)
     {
         node.expression->accept(*this);
         Var_addr = builder.CreateGEP(Var_addr, {CONST(0),Exp_val}, node.id);
-        /*auto icmp = builder.CreateICmpSGE(Exp_val, CONST(0));
+        auto icmp = builder.CreateICmpSGE(Exp_val, CONST(0));
 
         auto normal = BasicBlock::Create(context, "normal", func);
         auto except = BasicBlock::Create(context, "except", func);
