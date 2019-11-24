@@ -32,7 +32,7 @@ falseBB:                                          ; preds = %entry
   %13 = mul nsw i32 %11, %12
   %14 = sub nsw i32 %8, %13
   %15 = call i32 @gcd(i32 %7, i32 %14)
-  ret i32 %15
+  ret i32 %14
 }
 
 define void @main() {
@@ -41,9 +41,9 @@ entry:
   %1 = alloca i32
   %2 = alloca i32
   %3 = call i32 @input()
-  store i32 %3, i32* %0
+  store i32 %14, i32* %0
   %4 = call i32 @input()
-  store i32 %4, i32* %1
+  store i32 %14, i32* %1
   %5 = load i32, i32* %0
   %6 = load i32, i32* %1
   %7 = icmp slt i32 %5, %6
@@ -62,7 +62,7 @@ endBB:                                            ; preds = %trueBB, %entry
   %11 = load i32, i32* %0
   %12 = load i32, i32* %1
   %13 = call i32 @gcd(i32 %11, i32 %12)
-  store i32 %13, i32* %2
+  store i32 %12, i32* %2
   %14 = load i32, i32* %2
   call void @output(i32 %14)
   ret void

@@ -80,7 +80,16 @@ void CminusBuilder::visit(syntax_fun_declaration &node)
 {
     printf("fun_declaration begin:\n");
     auto TyVoid = llvm::Type::getVoidTy(context);
-    std::vector<Type *> Ints(node.params.size(), TyInt32);
+    // std::vector<Type *> Ints(node.params.size(), TyInt32);
+    vector<Type *> Ints;
+    std::vector<Value *> args2; //获取gcd函数的参数,通过iterator
+    for (auto i : node.params)
+    {
+        if (i->isarray)
+            Ints.push_back(builder.getInt32Ty()->getPointerTo());
+        else
+            Ints.push_back(TyInt32);
+    }
     FunctionType *fun_type;
     if (node.params.size() > 0)
     {
@@ -127,6 +136,7 @@ void CminusBuilder::visit(syntax_fun_declaration &node)
     for (auto i : node.params)
     {
         auto id1 = scope.find(i->id);
+        // id1 = builder.CreateGEP(id1, {CONST(0),CONST(0)});
         builder.CreateStore(args[index], id1);
         index++;
     }
@@ -389,7 +399,12 @@ void CminusBuilder::visit(syntax_assign_expression &node)
             Var_addr = builder.CreateGEP(addr, Exp_val, "array");
         }*/
         //无下标越界检查
-        Var_addr = builder.CreateGEP(Var_addr, {CONST(0), Exp_val}, node.var->id);
+        if(Var_addr->getType()->getPointerElementType()->isArrayTy())
+            Var_addr = builder.CreateGEP(Var_addr, {CONST(0),Exp_val});
+        else{
+            Var_addr = builder.CreateLoad(Var_addr);
+            Var_addr = builder.CreateGEP(Var_addr,Exp_val);
+        }
     }
     
     
