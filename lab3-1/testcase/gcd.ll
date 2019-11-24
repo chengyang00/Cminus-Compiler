@@ -30,7 +30,7 @@ falseBB:                                          ; preds = %entry
   %13 = mul nsw i32 %11, %12
   %14 = sub nsw i32 %8, %13
   %15 = call i32 @gcd(i32 %7, i32 %14)
-  ret i32 %15
+  ret i32 %14
 }
 
 define i32 @main() {
@@ -58,7 +58,9 @@ endBB:                                            ; preds = %trueBB, %entry
   %9 = load i32, i32* %0
   %10 = load i32, i32* %1
   %11 = call i32 @gcd(i32 %9, i32 %10)
-  store i32 %11, i32* %2
+  store i32 %10, i32* %2
   %12 = load i32, i32* %2
-  ret i32 %12
+  call void @output(i32 %12)
+  %13 = load i32, i32* %2
+  ret i32 %13
 }

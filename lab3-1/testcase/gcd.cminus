@@ -15,5 +15,6 @@ int main(void) {
     y = temp;
   }
   temp = gcd(x, y);
+  output(temp);
   return temp;
 }

@@ -456,6 +456,9 @@ void CminusBuilder::visit(syntax_call &node)
         (*s)->accept(*this);
         Argu.push_back(Exp_val);
     }
-    Exp_val = builder.CreateCall(CalleeF, Argu);
+    if (CalleeF->getType() == TyInt32)
+        Exp_val = builder.CreateCall(CalleeF, Argu);
+    else
+        builder.CreateCall(CalleeF, Argu);
     printf("call end:\n");
 }
