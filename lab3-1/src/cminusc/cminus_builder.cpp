@@ -107,6 +107,7 @@ void CminusBuilder::visit(syntax_fun_declaration &node)
                                       GlobalValue::LinkageTypes::ExternalLinkage,
                                       node.id, module.get());
     func = Fun;
+    auto bb = BasicBlock::Create(context, "entry", func);
     scope.push(node.id, Fun);
     scope.enter();
     printf("scope.enter:\n");
@@ -133,8 +134,11 @@ void CminusBuilder::visit(syntax_param &node)
     else
     {
         printf("3:\n");
-        auto uAlloca = builder.CreateAlloca(TYPE32);
-        scope.push(node.id, uAlloca);
+        //auto bb = BasicBlock::Create(context, "entry", func);
+        llvm::Value *uAlloca = builder.CreateAlloca(TYPE32);
+        std::string name = node.id;
+        printf("4\n");
+        scope.push(name, uAlloca);
     }
     printf("param end:\n");
 }
