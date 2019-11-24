@@ -202,11 +202,15 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
 
             builder.SetInsertPoint(trueBB);
             node.if_statement->accept(*this);
-            builder.CreateBr(endBB);
+            if (!trueBB->getTerminator()) {
+                builder.CreateBr(endBB);
+            }
 
             builder.SetInsertPoint(falseBB);
             node.else_statement->accept(*this);
-            builder.CreateBr(endBB);
+            if (!falseBB->getTerminator()) {
+                builder.CreateBr(endBB);
+            }
 
             // builder.CreateBr(endBB);
             builder.SetInsertPoint(endBB);
