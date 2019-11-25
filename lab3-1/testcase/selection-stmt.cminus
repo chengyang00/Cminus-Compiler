@@ -1,0 +1,23 @@
+void main(void)
+{
+	int i;
+	int j;
+	i=input();
+	if (i == 1) {
+		output(1);
+		return;
+	}else if (i==2){
+		output(2);
+		return;
+	}else{
+		output(3);
+		return;
+	}
+
+	if (i > 0) {
+		j = 1;
+	}
+	else if (i == 0) {
+		j = 2;
+	}
+}

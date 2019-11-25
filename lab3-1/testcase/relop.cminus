@@ -1,0 +1,11 @@
+void main(void)
+{
+	int i;
+	output(i < 3);
+	output(i > 3);
+	output(i <= 3);
+	output(i == 3);
+	output(i >= 3);
+	output(i != 3);
+	return;
+}

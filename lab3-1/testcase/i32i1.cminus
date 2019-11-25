@@ -1,0 +1,11 @@
+void main(void){
+	int i;
+	int j;
+	i = input();
+	j = input() > 3;
+	output(j);
+	if (124) output(111);
+	if (0-124) output(222);
+	if (123) output(333);
+	if (0-123) output(444);
+}

@@ -8,9 +8,10 @@ int gcd(int array[])
 void main(void)
 {
 	int array[2];
+	int a;
 	array[1] = 2;
 	array[0] = 1;
-	int a = gcd(array);
+	a = gcd(array);
 	return;
 }
 	

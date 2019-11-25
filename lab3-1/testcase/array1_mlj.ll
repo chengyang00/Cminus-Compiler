@@ -12,6 +12,7 @@ define i32 @main() {
 entry:
   %0 = alloca i32
   %1 = alloca [2 x i32]
+  store i32 3, i32* %0
   br i1 true, label %normal, label %except
 
 except:                                           ; preds = %entry
@@ -30,7 +31,6 @@ except1:                                          ; preds = %normal
 normal2:                                          ; preds = %normal
   %3 = getelementptr [2 x i32], [2 x i32]* %1, i32 0, i32 1
   store i32 2, i32* %3
-  store i32 3, i32* %0
   br i1 true, label %normal4, label %except3
 
 trueBB:                                           ; preds = %normal6
@@ -59,5 +59,7 @@ normal6:                                          ; preds = %normal4
   %array7 = getelementptr [2 x i32], [2 x i32]* %1, i32 0, i32 0
   %5 = load i32, i32* %array7
   %6 = icmp sgt i32 %4, %5
-  br i1 %6, label %trueBB, label %falseBB
+  %7 = zext i1 %6 to i32
+  %8 = icmp sgt i32 %7, 0
+  br i1 %8, label %trueBB, label %falseBB
 }

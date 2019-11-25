@@ -2,9 +2,9 @@ int main(void)
 {
 	int a;
 	int array[2];
+	a = 3;
 	array[0]=0;
 	array[1]=2;
-	a = 3;
 	if(array[1] > array[0])
 		return 0;
 	else
