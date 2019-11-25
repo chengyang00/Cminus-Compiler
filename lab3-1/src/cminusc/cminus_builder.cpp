@@ -493,8 +493,8 @@ void CminusBuilder::visit(syntax_call &node)
     for (auto s = node.args.begin(); s != node.args.end(); s++)
     {
         (*s)->accept(*this);
-        if(Exp_val->getType()->isPointerTy())
-            Exp_val = builder.CreateInBoundsGEP(Exp_val,{CONST(0),CONST(0)});
+        /*if(Exp_val->getType()->isPointerTy())
+            Exp_val = builder.CreateInBoundsGEP(Exp_val,{CONST(0),CONST(0)});*/
         Argu.push_back(Exp_val);
     }
     builder.CreateCall(CalleeF, Argu);
