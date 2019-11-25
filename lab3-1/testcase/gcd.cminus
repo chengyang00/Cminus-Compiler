@@ -1,40 +1,54 @@
-void sort(int array[])
+int x[10];
+ 
+int minloc (int a[], int low, int high)
 {
-    int i;
-    int j;
-    i = 4;
-    while (i >= 0)
-    {
-        j = 0;
-        while (j < i)
-        {
-            if (array[j] > array[j + 1])
-            {
-                int temp;
-                temp = array[j];
-                array[j] = array[j + 1];
-                array[j + 1] = temp;
-            }
-            j = j + 1;
-        }
-        i = i - 1;
-    }
-    return;
+	int i; int x; int k;
+	k = low;
+	x = a[low];
+	i = low + 1;
+	while (i<high)
+	{
+		if (a[i] < x)
+		{
+			x = a[i];
+			k = i;
+		}
+		i = i + 1;
+	}
+	return k;
 }
-
+ 
+void sort(int a[], int low, int high)
+{
+	int i; int k;
+	i = low;
+	while (i<high-1)
+	{
+		int t;
+		k = minloc(a, i, high);
+		t = a[k];
+		a[k] = a[i];
+		a[i] = t;
+		i = i + 1;
+	}
+  return;
+}
+ 
 void main(void)
 {
-    int array[5];
-    array[0] = 3;
-    array[1] = 4;
-    array[2] = 1;
-    array[3] = 8;
-    array[4] = 7;
-    sort(array);
-    output(array[0]);
-    output(array[1]);
-    output(array[2]);
-    output(array[3]);
-    output(array[4]);
-    return;
+	int i;
+	i = 0;
+	while (i < 10)
+	{
+		x[i] = input();
+		i = i + 1;
+	}
+	sort(x, 0, 10);
+	i = 0;
+	while (i<10)
+	{
+		output(x[i]);
+		i = i+1;
+	}
+  return;
 }
