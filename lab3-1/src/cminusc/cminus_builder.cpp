@@ -208,17 +208,20 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
 
             node.expression->accept(*this);
             // auto icmp = builder.CreateICmpNE(Exp_val, CONST(0));
-            auto br = builder.CreateCondBr(Exp_val, trueBB, falseBB);
+            auto icmp = builder.CreateICmpSGT(Exp_val, CONST(0));
+            auto br = builder.CreateCondBr(icmp, trueBB, falseBB);
 
             builder.SetInsertPoint(trueBB);
             node.if_statement->accept(*this);
-            if (!trueBB->getTerminator()) {
+            if (!trueBB->getTerminator())
+            {
                 builder.CreateBr(endBB);
             }
 
             builder.SetInsertPoint(falseBB);
             node.else_statement->accept(*this);
-            if (!falseBB->getTerminator()) {
+            if (!falseBB->getTerminator())
+            {
                 builder.CreateBr(endBB);
             }
 
@@ -231,9 +234,9 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
             auto endBB = llvm::BasicBlock::Create(context, "endBB", func);
 
             node.expression->accept(*this);
-            // auto icmp = builder.CreateICmpNE(Exp_val, CONST(0));
+            auto icmp = builder.CreateICmpNE(Exp_val, CONST(0));
             // printf("select begin:\n");
-            auto br = builder.CreateCondBr(Exp_val, trueBB, endBB);
+            auto br = builder.CreateCondBr(icmp, trueBB, endBB);
 
             builder.SetInsertPoint(trueBB);
             node.if_statement->accept(*this);
@@ -249,8 +252,8 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
             auto falseBB = llvm::BasicBlock::Create(context, "falseBB", func);
 
             node.expression->accept(*this);
-            // auto icmp = builder.CreateICmpNE(Exp_val, CONST(0));
-            auto br = builder.CreateCondBr(Exp_val, trueBB, falseBB);
+            auto icmp = builder.CreateICmpNE(Exp_val, CONST(0));
+            auto br = builder.CreateCondBr(icmp, trueBB, falseBB);
 
             builder.SetInsertPoint(trueBB);
             node.if_statement->accept(*this);
@@ -273,7 +276,8 @@ void CminusBuilder::visit(syntax_iteration_stmt &node)
     builder.CreateBr(jugBB);
     builder.SetInsertPoint(jugBB);
     node.expression->accept(*this);
-    auto br = builder.CreateCondBr(Exp_val, l_trueBB, l_falseBB);
+    auto icmp = builder.CreateICmpSGT(Exp_val, CONST(0));
+    auto br = builder.CreateCondBr(icmp, l_trueBB, l_falseBB);
 
     builder.SetInsertPoint(l_trueBB);
     node.statement->accept(*this);
@@ -305,6 +309,7 @@ void CminusBuilder::visit(syntax_return_stmt &node)
 
 void CminusBuilder::visit(syntax_var &node)
 {
+    // 取出变量的值
     // std::cout<<"var begin"<<endl;
     llvm::Value *Var_addr = scope.find(node.id);
     //auto check_end = BasicBlock::Create(context, "check_end", func);
@@ -316,34 +321,36 @@ void CminusBuilder::visit(syntax_var &node)
         //auto check_end = BasicBlock::Create(context, "check_end", func);
         auto except = BasicBlock::Create(context, "except", func);
         auto normal = BasicBlock::Create(context, "normal", func);
-        
+
         auto br = builder.CreateCondBr(icmp, normal, except);
         builder.SetInsertPoint(except);
         auto neg = scope.find("neg_idx_except");
         builder.CreateCall(neg);
         builder.CreateRet(CONST(0));
         builder.SetInsertPoint(normal);
-        if(Var_addr->getType()->getPointerElementType()->isArrayTy())
-            Var_addr = builder.CreateGEP(Var_addr, {CONST(0),Exp_val}, node.id);
-        else{
+        if (Var_addr->getType()->getPointerElementType()->isArrayTy())
+            // 判断是指向数组的指针（且不是形参），转换成指向对应元素的指针
+            Var_addr = builder.CreateGEP(Var_addr, {CONST(0), Exp_val}, node.id);
+        else
+        {
+            // 此时应该是数组形参，是指针的地址，这条语句的作用是取出指向首元素的指针
             Var_addr = builder.CreateLoad(Var_addr);
-            Var_addr = builder.CreateGEP(Var_addr,Exp_val);
+            // 这条语句的作用是根据首元素的指针找到偏移元素的地址
+            Var_addr = builder.CreateGEP(Var_addr, Exp_val);
         }
-        
     }
-    /*int *addr;
-    ConstantInt *C = dyn_cast<ConstantInt>(Var_addr);
-    addr = C->getSExtValue();*/
-    if (Var_addr->getType()->getPointerElementType()->isArrayTy()){
+
+    if (Var_addr->getType()->getPointerElementType()->isArrayTy())
+    {
+        //判断是指向数组的指针，此时应该是实参
         Exp_val = Var_addr;
-        // printf("ararararararrarararararararararararararararararararararara\n");
     }
-        
-    else{
+    else
+    {
+        // 不是指向数组的指针，那么根据上面的处理，从对应地址中取出值
         Exp_val = builder.CreateLoad(Var_addr);
-        // printf("itititititiititititititiitititititititititititiitititititi\n");
     }
-        
+
     // std::cout<<"var end"<<endl;
 }
 
@@ -359,27 +366,30 @@ void CminusBuilder::visit(syntax_assign_expression &node)
         //auto check_end = BasicBlock::Create(context, "check_end", func);
         auto except = BasicBlock::Create(context, "except", func);
         auto normal = BasicBlock::Create(context, "normal", func);
-        
+
         auto br = builder.CreateCondBr(icmp, normal, except);
         builder.SetInsertPoint(except);
         auto neg = scope.find("neg_idx_except");
         builder.CreateCall(neg);
         builder.CreateRet(CONST(0));
         builder.SetInsertPoint(normal);
-        
-        if(Var_addr->getType()->getPointerElementType()->isArrayTy())
-            Var_addr = builder.CreateGEP(Var_addr, {CONST(0),Exp_val});
-        else{
+
+        if (Var_addr->getType()->getPointerElementType()->isArrayTy())
+            // 判断是指向数组的指针（且不是形参），转换成指向对应元素的指针
+            Var_addr = builder.CreateGEP(Var_addr, {CONST(0), Exp_val});
+        else
+        {
+            // 此时应该是数组形参，是指针的地址，这条语句的作用是取出指向首元素的指针
             Var_addr = builder.CreateLoad(Var_addr);
-            Var_addr = builder.CreateGEP(Var_addr,Exp_val);
+            // 这条语句的作用是根据首元素的指针找到偏移元素的地址
+            Var_addr = builder.CreateGEP(Var_addr, Exp_val);
         }
     }
-    
-    
+
     //node.var->accept(*this);
     //调用 var 得到地址后，直接使用。
     node.expression->accept(*this);
-    
+
     builder.CreateStore(Exp_val, Var_addr);
     // printf("assign_expression end:\n");
     // std::cout<<"assign_expression end"<<endl;
@@ -402,28 +412,34 @@ void CminusBuilder::visit(syntax_simple_expression &node)
         if (node.op == OP_LT)
         {
             Exp_val = builder.CreateICmpSLT(addiexpr1, addiexpr2);
+            Exp_val = builder.CreateIntCast(Exp_val, Type::getInt32Ty(context), false);
         }
         else if (node.op == OP_LE)
         {
             Exp_val = builder.CreateICmpSLE(addiexpr1, addiexpr2);
+            Exp_val = builder.CreateIntCast(Exp_val, Type::getInt32Ty(context), false);
         }
         else if (node.op == OP_GE)
         {
             Exp_val = builder.CreateICmpSGE(addiexpr1, addiexpr2);
+            Exp_val = builder.CreateIntCast(Exp_val, Type::getInt32Ty(context), false);
         }
         else if (node.op == OP_GT)
         {
             Exp_val = builder.CreateICmpSGT(addiexpr1, addiexpr2);
+            Exp_val = builder.CreateIntCast(Exp_val, Type::getInt32Ty(context), false);
         }
         else if (node.op == OP_EQ)
         {
             // printf("EQ begin:\n");
             Exp_val = builder.CreateICmpEQ(addiexpr1, addiexpr2);
+            Exp_val = builder.CreateIntCast(Exp_val, Type::getInt32Ty(context), false);
             // printf("EQ end:\n");
         }
         else if (node.op == OP_NEQ)
         {
             Exp_val = builder.CreateICmpNE(addiexpr1, addiexpr2);
+            Exp_val = builder.CreateIntCast(Exp_val, Type::getInt32Ty(context), false);
         }
     }
     // std::cout<<"simple_expression end"<<endl;
@@ -493,11 +509,13 @@ void CminusBuilder::visit(syntax_call &node)
     for (auto s = node.args.begin(); s != node.args.end(); s++)
     {
         (*s)->accept(*this);
-        if(Exp_val->getType()->isPointerTy())
-            Exp_val = builder.CreateInBoundsGEP(Exp_val,{CONST(0),CONST(0)});
+        // 如果是数组类型，通过这条语句将指向数组的指针转换成指向数组首元素的指针，
+        // 第一个CONST(0)意思是元素的首元素从零开始，第二个CONST(0)表示首元素。
+        if (Exp_val->getType()->isPointerTy())
+            Exp_val = builder.CreateGEP(Exp_val, {CONST(0), CONST(0)});
         Argu.push_back(Exp_val);
     }
-    builder.CreateCall(CalleeF, Argu);
+    Exp_val = builder.CreateCall(CalleeF, Argu);
     // printf("call end:\n");
     // std::cout<<"call end"<<endl;
 }
