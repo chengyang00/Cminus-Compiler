@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 int gcd (int u, int v) { 
     if (v == 0) return u;
     else return gcd(v, u - u / v * v);
@@ -7,7 +9,7 @@ int gcdd(int u[]){
     return gcd(u[0], u[1]);
 }
 
-void main(void){
+int main(){
     int x; int y; int temp;
     int a[2];
     x = 72; y = 18;
@@ -16,7 +18,8 @@ void main(void){
         x = y;
         y = temp;
     }
-    output(gcd(x, y) + gcd(a[0] = gcd(x, y), a[1] = y));
-    output(gcdd(a));
-    return;
+    int xy = (gcd(x, y) + gcd(a[0] = gcd(x, y), a[1] = y));
+    int yx = gcdd(a);
+    printf("%d %d\n", xy, yx);
+    return 0;
 }

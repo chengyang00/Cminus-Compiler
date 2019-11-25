@@ -20,4 +20,5 @@ void main(void)
 	else if (i == 0) {
 		j = 2;
 	}
+	return;
 }

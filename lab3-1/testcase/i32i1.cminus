@@ -8,4 +8,5 @@ void main(void){
 	if (0-124) output(222);
 	if (123) output(333);
 	if (0-123) output(444);
+	return;
 }
