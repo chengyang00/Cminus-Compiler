@@ -13,9 +13,19 @@ entry:
   br i1 true, label %trueBB, label %endBB
 
 trueBB:                                           ; preds = %entry
-  ret i32 1
-  br label %endBB
+  br i1 true, label %trueBB1, label %falseBB
 
-endBB:                                            ; preds = %trueBB, %entry
+endBB:                                            ; preds = %endBB2, %entry
+  ret i32 3
+
+trueBB1:                                          ; preds = %trueBB
+  ret i32 1
+  br label %endBB2
+
+falseBB:                                          ; preds = %trueBB
   ret i32 2
+  br label %endBB2
+
+endBB2:                                           ; preds = %falseBB, %trueBB1
+  br label %endBB
 }
