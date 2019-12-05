@@ -6,7 +6,7 @@ using namespace std;
 #define CONST(num) \
     ConstantInt::get(context, APInt(32, num)) //得到常数值的表示,方便后面多次用到
 #define TyInt32 Type::getInt32Ty(context)
-#define DEBUG true
+#define DEBUG false
 
 Function *func;
 Value *Exp_val;
