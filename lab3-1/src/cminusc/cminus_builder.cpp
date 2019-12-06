@@ -259,9 +259,10 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
 void CminusBuilder::visit(syntax_iteration_stmt &node)
 {
     if (DEBUG) printf("iteration_stmt beign:\n");
-    auto jugBB = llvm::BasicBlock::Create(context, "jugBB", func);
-    auto l_trueBB = llvm::BasicBlock::Create(context, "trueBB", func);
-    auto l_falseBB = llvm::BasicBlock::Create(context, "falseBB", func);
+    if(stmt_num > 0){
+        auto jugBB = llvm::BasicBlock::Create(context, "jugBB", func);
+        auto l_trueBB = llvm::BasicBlock::Create(context, "trueBB", func);
+        auto l_falseBB = llvm::BasicBlock::Create(context, "falseBB", func);
 
     builder.CreateBr(jugBB);
     builder.SetInsertPoint(jugBB);
@@ -277,6 +278,7 @@ void CminusBuilder::visit(syntax_iteration_stmt &node)
     builder.SetInsertPoint(l_falseBB);
 
     if (DEBUG) printf("iteration_stmt end:\n");
+}
 }
 
 void CminusBuilder::visit(syntax_return_stmt &node)
@@ -489,11 +491,11 @@ void CminusBuilder::visit(syntax_call &node)
         (*s)->accept(*this);
         // 如果是数组类型，通过这条语句将指向数组的指针转换成指向数组首元素的指针，
         // 第一个CONST(0)意思是元素的首元素从零开始，第二个CONST(0)表示首元素。
-        if (Exp_val->getType()->isPointerTy())
+        /*if (Exp_val->getType()->isPointerTy())
         {
             if (Exp_val->getType()->getPointerElementType()->isArrayTy())
                 Exp_val = builder.CreateGEP(Exp_val, {CONST(0), CONST(0)});
-        }
+        }*/
         Argu.push_back(Exp_val);
     }
     Exp_val = builder.CreateCall(CalleeF, Argu);
