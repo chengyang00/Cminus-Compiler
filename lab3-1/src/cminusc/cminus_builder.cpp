@@ -6,11 +6,12 @@ using namespace std;
 #define CONST(num) \
     ConstantInt::get(context, APInt(32, num)) //得到常数值的表示,方便后面多次用到
 #define TyInt32 Type::getInt32Ty(context)
-#define DEBUG true
+#define DEBUG false
 
 Function *func;
 Value *Exp_val;
 int stmt_num;
+// vector<int> stmt_nums;
 
 
 void CminusBuilder::visit(syntax_program &node)
@@ -160,6 +161,7 @@ void CminusBuilder::visit(syntax_param &node)
 void CminusBuilder::visit(syntax_compound_stmt &node)
 {
     if (DEBUG) printf("compound_stmt begin:\n");
+    // stmt_nums.push_back(0);
     scope.enter();
     for (auto delc : node.local_declarations)
     {
@@ -168,13 +170,16 @@ void CminusBuilder::visit(syntax_compound_stmt &node)
     for (auto stmt : node.statement_list)
     {
         stmt_num++;
+        // *(stmt_nums.rbegin())++;
     }
     for (auto stmt : node.statement_list)
     {
         stmt_num--;
+        // *(stmt_nums.rbegin())--;
         stmt->accept(*this);
     }
     scope.exit();
+    // stmt_nums.pop_back();
     if (DEBUG) printf("compound_stmt end:\n");
 }
 
@@ -198,28 +203,24 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
             auto endBB = llvm::BasicBlock::Create(context, "endBB", func);
 
             node.expression->accept(*this);
-            // auto icmp = builder.CreateICmpNE(Exp_val, CONST(0));
-            auto icmp = builder.CreateICmpSGT(Exp_val, CONST(0));
+            auto icmp = builder.CreateICmpNE(Exp_val, CONST(0));
             auto br = builder.CreateCondBr(icmp, trueBB, falseBB);
 
             builder.SetInsertPoint(trueBB);
             node.if_statement->accept(*this);
             if (!trueBB->getTerminator())
-            {
                 builder.CreateBr(endBB);
-            }
 
             builder.SetInsertPoint(falseBB);
             node.else_statement->accept(*this);
             if (!falseBB->getTerminator())
-            {
                 builder.CreateBr(endBB);
-            }
 
             builder.SetInsertPoint(endBB);
         }
         else
         {
+            // 无 else 语句
             auto trueBB = llvm::BasicBlock::Create(context, "trueBB", func);
             auto endBB = llvm::BasicBlock::Create(context, "endBB", func);
 
@@ -229,7 +230,8 @@ void CminusBuilder::visit(syntax_selection_stmt &node)
 
             builder.SetInsertPoint(trueBB);
             node.if_statement->accept(*this);
-            builder.CreateBr(endBB);
+            // if (!trueBB->getTerminator())
+                builder.CreateBr(endBB);
             builder.SetInsertPoint(endBB);
         }
     }
@@ -262,36 +264,19 @@ void CminusBuilder::visit(syntax_iteration_stmt &node)
         auto l_trueBB = llvm::BasicBlock::Create(context, "trueBB", func);
         auto l_falseBB = llvm::BasicBlock::Create(context, "falseBB", func);
 
-        builder.CreateBr(jugBB);
-        builder.SetInsertPoint(jugBB);
-        node.expression->accept(*this);
-        auto icmp = builder.CreateICmpSGT(Exp_val, CONST(0));
-        auto br = builder.CreateCondBr(icmp, l_trueBB, l_falseBB);
+    builder.CreateBr(jugBB);
+    builder.SetInsertPoint(jugBB);
+    node.expression->accept(*this);
+    auto icmp = builder.CreateICmpNE(Exp_val, CONST(0));
+    auto br = builder.CreateCondBr(icmp, l_trueBB, l_falseBB);
 
-        builder.SetInsertPoint(l_trueBB);
-        node.statement->accept(*this);
-        builder.CreateBr(jugBB);
-
-        builder.SetInsertPoint(l_falseBB);
-    }
-    else{
-        auto jugBB = llvm::BasicBlock::Create(context, "jugBB", func);
-        auto l_trueBB = llvm::BasicBlock::Create(context, "trueBB", func);
-        auto l_falseBB = llvm::BasicBlock::Create(context, "falseBB", func);
-
-        builder.CreateBr(jugBB);
-        builder.SetInsertPoint(jugBB);
-        node.expression->accept(*this);
-        auto icmp = builder.CreateICmpSGT(Exp_val, CONST(0));
-        auto br = builder.CreateCondBr(icmp, l_trueBB, l_falseBB);
-
-        builder.SetInsertPoint(l_trueBB);
-        node.statement->accept(*this);
+    builder.SetInsertPoint(l_trueBB);
+    node.statement->accept(*this);
+    // if (!l_trueBB->getTerminator())
         builder.CreateBr(jugBB);
 
-        builder.SetInsertPoint(l_falseBB);
-        builder.CreateRet(CONST(0));
-    }
+    builder.SetInsertPoint(l_falseBB);
+
     if (DEBUG) printf("iteration_stmt end:\n");
 }
 
@@ -327,7 +312,10 @@ void CminusBuilder::visit(syntax_var &node)
         builder.SetInsertPoint(except);
         auto neg = scope.find("neg_idx_except");
         builder.CreateCall(neg);
-        builder.CreateRet(CONST(0));
+        if (func->getFunctionType()->getReturnType()->isVoidTy())
+            builder.CreateRetVoid();
+        else
+            builder.CreateRet(CONST(0));
         builder.SetInsertPoint(normal);
         if (Var_addr->getType()->getPointerElementType()->isArrayTy())
             // 判断是指向数组的指针（且不是形参），转换成指向对应元素的指针
@@ -370,7 +358,10 @@ void CminusBuilder::visit(syntax_assign_expression &node)
         builder.SetInsertPoint(except);
         auto neg = scope.find("neg_idx_except");
         builder.CreateCall(neg);
-        builder.CreateRet(CONST(0));
+        if (func->getFunctionType()->getReturnType()->isVoidTy())
+            builder.CreateRetVoid();
+        else
+            builder.CreateRet(CONST(0));
         builder.SetInsertPoint(normal);
 
         if (Var_addr->getType()->getPointerElementType()->isArrayTy())
