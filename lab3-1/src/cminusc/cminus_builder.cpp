@@ -279,6 +279,7 @@ void CminusBuilder::visit(syntax_iteration_stmt &node)
 
     if (DEBUG) printf("iteration_stmt end:\n");
 }
+}
 
 void CminusBuilder::visit(syntax_return_stmt &node)
 {
