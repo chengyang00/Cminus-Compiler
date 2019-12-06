@@ -1,0 +1,8 @@
+void main(void){
+	int i;
+	i = input();
+	while (i < 0){}
+	while (i < 0 - 1 + 2 - 3 * 1);
+	if (i > 0);
+	else if (i > 1){output(1);}
+}

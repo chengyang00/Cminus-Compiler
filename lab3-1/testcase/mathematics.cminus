@@ -1,0 +1,10 @@
+void main(void)
+{
+	int i; int j; int k;
+	j=input();
+	i = 3 / (1 + (2 + 3) * (j + 1));
+	output(i);
+	i = j*j*j*j*j*j*j*j;
+	output(i);
+	return;
+}

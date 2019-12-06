@@ -17,7 +17,9 @@ entry:
   %2 = load i32, i32* %0
   %3 = load i32, i32* %1
   %4 = icmp sgt i32 %2, %3
-  br i1 %4, label %trueBB, label %falseBB
+  %5 = zext i1 %4 to i32
+  %6 = icmp ne i32 %5, 0
+  br i1 %6, label %trueBB, label %falseBB
 
 trueBB:                                           ; preds = %entry
   ret i32 0

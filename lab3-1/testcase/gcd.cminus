@@ -1,40 +1,20 @@
-void sort(int array[])
-{
-    int i;
-    int j;
-    i = 4;
-    while (i >= 0)
-    {
-        j = 0;
-        while (j < i)
-        {
-            if (array[j] > array[j + 1])
-            {
-                int temp;
-                temp = array[j];
-                array[j] = array[j + 1];
-                array[j + 1] = temp;
-            }
-            j = j + 1;
-        }
-        i = i - 1;
-    }
-    return;
+int gcd (int u, int v) {
+  if (v == 0) return u;
+  else return gcd(v, u - u / v * v);
 }
 
-void main(void)
-{
-    int array[5];
-    array[0] = 3;
-    array[1] = 4;
-    array[2] = 1;
-    array[3] = 8;
-    array[4] = 7;
-    sort(array);
-    output(array[0]);
-    output(array[1]);
-    output(array[2]);
-    output(array[3]);
-    output(array[4]);
-    return;
+void main(void) {
+  int x;
+  int y;
+  int temp;
+  x = input();
+  y = input();
+  if (x < y) {
+    temp = x;
+    x = y;
+    y = temp;
+  }
+  temp = gcd(x, y);
+  output(temp);
+  return;
 }

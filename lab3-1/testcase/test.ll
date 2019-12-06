@@ -1,5 +1,5 @@
 ; ModuleID = 'cminus'
-source_filename = "gcd.cminus"
+source_filename = "test.cminus"
 target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 
 @x = common global [10 x i32] zeroinitializer
@@ -132,6 +132,7 @@ trueBB:                                           ; preds = %jugBB
   br i1 %21, label %normal, label %except
 
 falseBB:                                          ; preds = %jugBB
+  ret i32 0
 
 except:                                           ; preds = %trueBB
   call void @neg_idx_except()
@@ -204,7 +205,7 @@ trueBB:                                           ; preds = %jugBB
   br i1 %6, label %normal, label %except
 
 falseBB:                                          ; preds = %jugBB
-  call void @sort(i32* getelementptr inbounds ([10 x i32], [10 x i32]* @x, i32 0, i32 0), i32 0, i32 10)
+  call void @sort([10 x i32]* @x, i32 0, i32 10)
   store i32 0, i32* %0
   br label %jugBB1
 
@@ -234,6 +235,7 @@ trueBB2:                                          ; preds = %jugBB1
   br i1 %16, label %normal5, label %except4
 
 falseBB3:                                         ; preds = %jugBB1
+  ret i32 0
 
 except4:                                          ; preds = %trueBB2
   call void @neg_idx_except()
