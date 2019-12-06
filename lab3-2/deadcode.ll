@@ -12,17 +12,16 @@ define i32 @main() {
 entry:
   %0 = alloca i32
   %1 = alloca i32
-  store i32 1, i32* %0                            ; Dead Code
+  store i32 1, i32* %0
   store i32 1, i32* %1
-  %c = add nsw i32 1, 2                           ; Dead Code
-  br i1 false, label %trueBB, label %endBB        ; Dead Code
+  br i1 false, label %trueBB, label %endBB
 
 trueBB:                                           ; preds = %entry
   store i32 2, i32* %1
   br label %endBB
 
 endBB:                                            ; preds = %trueBB, %entry
-  br i1 true, label %trueBB1, label %endBB2       ; Dead Code
+  br i1 true, label %trueBB1, label %endBB2
 
 trueBB1:                                          ; preds = %endBB
   store i32 3, i32* %1
