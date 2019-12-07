@@ -93,72 +93,15 @@ br3:                                              ; preds = %br2, %5
 
 1. 输入函数时，调用Pass开始检查
 
-```flow
-st=>start: 输入函数
-cond1=>condition: 检测是否执行
-st->cond1
-op1=>operation: 取函数指令分析表TLI
-op2=>operation: 结束程序
-cond1(yes)->op1
-cond1(no)->op2
-op3=>operation: 开始删除死代码
-op1->op3
-sub1=>subroutine: eliminateDeadCode
-op3->sub1
-e=>end: 输出函数
-sub1->e
-```
+![pic](./picture/4.PNG)
 
 2. eliminateDeadCode删除死指令后，又再次判断删除死指令的指令是否为死指令，达到删除无效代码的效果
 
-   ```flow
-   st=>start: 开始
-   cond1=>condition: 是否还有指令
-   op4=>operation: 取指令
-   st->cond1
-   cond1(yes)->op4
-   cond2=>condition: 该指令是否已在WorkList中
-   sub2=>subroutine: DCEInstruction
-   op4->cond2
-   cond2(yes)->op4
-   cond2(no)->sub2
-   sub2->cond1
-   cond3=>condition: WorkList是否为空
-   op5=>operation: 从WorkList取出指令
-   sub3=>subroutine: DCEInstruction
-   cond3(yes)->op5
-   op5->sub3
-   sub3->cond3
-   cond1(no)->cond3
-   e=>end: 结束
-   cond3(no)->e
-   ```
-
+   ![pic1](./picture/5.PNG)
+   
 3. DCEInstruction中，通过将指令中每个操作数无效化，来检测其是否为死指令。
 
-   ```flow
-   st=>start: Start
-   cond3=>condition: 根据TLI是否为死指令
-   st->cond3
-   cond4=>condition: DCE计数器是否为0
-   op5=>operation: 不删除该指令
-   cond3(no)->op5
-   cond3(yes)->cond4
-   cond4(yes)->op5
-   op6=>operation: 取指令的操作数
-   cond4(no)->op6
-   op7=>operation: 使该操作数在指令中无效
-   cond5=>condition: 该操作数被使用或指令的值为操作数的值
-   cond5(yes)->op6
-   op7->cond5
-   op6->op7
-   cond6=>condition: 该操作数无效化后是否成为无影响的指令
-   op8=>operation: 在WorkList中加入该指令
-   cond6(yes)->op8
-   cond5(no)->cond6
-   op9=>operation: 该指令在父母节点中删除
-   op8->op9
-   ```
+   ![pic2](./picture/6.PNG)
 
 ### adce
 
@@ -175,6 +118,7 @@ adce Pass的作用：
 #### 任务2：
 
 源IR：
+
 ![2](./picture/1.png)
 
 LLVM IR：
