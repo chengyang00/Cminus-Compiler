@@ -23,7 +23,7 @@
   $ cd build
   $ cmake -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD=RISCV -DLLVM_TARGETS_TO_BUILD=X86 /mnt/e/Compiler_Principles/llvm/llvm
   $ make -j2
-    ```
+  ```
 
     执行完毕后llvm支持RISC-V。
 
@@ -51,7 +51,7 @@
 
   生成RISC-V源码：
 
-  ![1](pic/Configure.PNG)
+  ![1](./pic/configure.PNG)
 
   gcd.ll：
 
@@ -252,7 +252,7 @@
   
   运行生成的gcd.riscv
   
-  ![2](\pic\Execute.PNG)
+  ![2](./pic/execute.PNG)
 
 #### 2. LLVM源码阅读与理解
 
