@@ -229,7 +229,7 @@
 
 - 安装 Spike模拟器并运行上述生成的RISC-V源码
 
-  在https://github.com/riscv/riscv-isa-sim/上下载riscv-isa-sim后，进入该路径执行以下指令
+  在https://github.com/riscv/riscv-isa-sim/ 上下载riscv-isa-sim后，进入该路径执行以下指令
   
   ```
   $ sudo apt-get install device-tree-compiler
@@ -240,7 +240,7 @@
   $ sudo make install
   ```
   
-  在https://github.com/riscv/riscv-pk上下载riscv-pk后，进入该路径执行以下指令
+  在https://github.com/riscv/riscv-pk 上下载riscv-pk后，进入该路径执行以下指令
   
   ```
   $ mkdir build
