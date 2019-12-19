@@ -30,11 +30,19 @@
 
   * RegAllocFast* 函数的执行流程？
 
-    答：......
+    答：
+
+    <img src="pic/RegAllocFast.PNG" style="zoom:60%;" />
 
   * *allocateInstruction* 函数有几次扫描过程以及每一次扫描的功能？
 
-    答：......
+    答：共有三次扫描过程。
+
+    第一次：将使用的 physreg 和早先 clobber 的 register 标记为已使用。找到 virtreg 操作数的结尾位置。
+
+    第二次：分配使用的 virtreg 。追踪指令定义的 early clobbers 和 tied uses 的寄存器，将 defs 和tied uses 的 physreg 标记为已使用。在 call 之前将所有 virtreg 加入 spill slots 。
+
+    第三次：分配 defs 。收集 dead defs 并在扫描之后杀死 dead defs。
 
   * *calcSpillCost* 函数的执行流程？
 
@@ -42,7 +50,11 @@
 
   * *hasTiedOps*，*hasPartialRedefs，hasEarlyClobbers* 变量的作用？
 
-    答：......
+    答：hasTiedOps: 指示是否存在 tied operand，作为判断条件的一部分。当操作数是一个 set 时 hasTiedOps 为 true。
+    
+    hasPartialRedefs: 指示当操作数是一个 use 时指令是否读取了 virtual register 。
+    
+    hasEarlyClobbers: 如果在读取所有输入寄存器之前，指令将此 MO_Register 'def' 操作数写入，则为 True 。这用于对 GCC 内联 asm '&' 约束修饰符建模。指示是否存在 early clobbers 。
 
 - 书上所讲的算法与LLVM源码中的实现之间的不同点
 
