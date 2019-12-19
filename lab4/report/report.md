@@ -252,7 +252,7 @@
   
   运行生成的gcd.riscv
   
-  ![2](./pic/execute.PNG)
+  ![2](./pic/Execute.PNG)
 
 #### 2. LLVM源码阅读与理解
 
