@@ -36,13 +36,15 @@
 
   * *allocateInstruction* 函数有几次扫描过程以及每一次扫描的功能？
 
-    答：共有三次扫描过程。
+    答：共有四次扫描过程。
 
     第一次：将使用的 physreg 和早先 clobber 的 register 标记为已使用。找到 virtreg 操作数的结尾位置。
 
-    第二次：分配使用的 virtreg 。追踪指令定义的 early clobbers 和 tied uses 的寄存器，将 defs 和tied uses 的 physreg 标记为已使用。在 call 之前将所有 virtreg 加入 spill slots 。
+    第二次：分配使用的 virtreg 。追踪指令定义的 early clobbers 和 tied uses 的寄存器，将 defs 和tied uses 的 physreg 标记为已使用。为未定义的操作数分配寄存器，在‘= op undef %X，%X’情形下，两个操作数赋值给同一个寄存器。在 call 之前将所有 virtreg 加入 spill slots 。
 
-    第三次：分配 defs 。收集 dead defs 并在扫描之后杀死 dead defs。
+    第三次：在分配 virtreg defs之前将所有 physreg defs 标记为已使用。
+
+    第四次：分配 defs 。收集 dead defs 并在扫描之后杀死 dead defs。
 
   * *calcSpillCost* 函数的执行流程？
 
